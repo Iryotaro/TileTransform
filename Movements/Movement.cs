@@ -9,7 +9,6 @@ namespace TileTransforms.Movements
         private MoveRate moveRate { get; }
         private TilePosition prevPosition;
         private TilePosition nextPosition;
-        public float speed = 1;
         private float setNextPositionTime;
 
         public Movement(MoveData moveData, MoveRate moveRate)
@@ -46,13 +45,14 @@ namespace TileTransforms.Movements
 
             setNextPositionTime = Time.fixedTime;
 
-            float waitTime = 1 / moveRate.value / speed;
+            float waitTime = 1 / moveRate.value;
             await Task.Delay((int)waitTime * 1000);
+            Debug.Log((int)waitTime * 1000);
             SetNextPosition();
         }
         private float GetTimeFromSetNextPosition()
         {
-            return (Time.fixedTime - setNextPositionTime) * moveRate.value * speed;
+            return (Time.fixedTime - setNextPositionTime) * moveRate.value;
         }
     }
 }

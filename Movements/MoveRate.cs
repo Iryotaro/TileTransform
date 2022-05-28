@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace TileTransforms.Movements
+namespace TileTransforms
 {
     public class MoveRate
     {
