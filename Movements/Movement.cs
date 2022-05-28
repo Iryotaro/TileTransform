@@ -46,7 +46,7 @@ namespace TileTransforms.Movements
             setNextPositionTime = Time.fixedTime;
 
             float waitTime = 1 / moveRate.value;
-            await Task.Delay((int)waitTime * 1000);
+            await Task.Delay((int)(waitTime * 1000));
             SetNextPosition();
         }
         private float GetTimeFromSetNextPosition()
