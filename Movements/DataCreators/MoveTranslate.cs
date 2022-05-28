@@ -1,0 +1,25 @@
+﻿using System.Collections.Generic;
+
+namespace TileTransforms.Movements
+{
+    public class MoveTranslate : IMoveDataCreater
+    {
+        private MoveData moveData;
+
+        public MoveTranslate(TilePosition position, TileDirection tileDirection)
+        {
+            TilePosition nextPosition = position.GetAroundTile(tileDirection);
+
+            if (nextPosition == null) moveData = null;
+            else moveData = new MoveData(new List<TilePosition>() { position, nextPosition });
+        }
+        public MoveData GetData()
+        {
+            return moveData;
+        }
+        public bool IsSuccess()
+        {
+            return moveData != null;
+        }
+    }
+}

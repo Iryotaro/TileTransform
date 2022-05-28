@@ -1,0 +1,9 @@
+{
+    "name": "com..tiletransform",
+    "version": "1.0.0",
+    "displayName": "Tile Transform",
+    "unity": "2020.3",
+    "dependencies": {
+        "com.unity.inputsystem": "1.2.0"
+    }
+}
