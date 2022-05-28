@@ -29,8 +29,8 @@ namespace TileTransforms
         {
             if (movement == null) return;
 
-            movement.Update();
-            if (!movement.finish) transform.position = movement.GetWorldPosition();
+            tilePosition = movement.GetTilePosition();
+            transform.position = movement.GetWorldPosition();
         }
 
         public void ChangePosition(TilePosition tilePosition)
@@ -44,11 +44,15 @@ namespace TileTransforms
 
         public void Translate(TileDirection direction)
         {
+            if (direction == null) throw new ArgumentNullException(nameof(direction));
+
             MoveTranslate moveData = new MoveTranslate(tilePosition, direction);
             ChangeMovement(moveData);
         }
         public void Dijkstra(TilePosition destinationPosition)
         {
+            if (destinationPosition == null) throw new ArgumentNullException(nameof(destinationPosition));
+
             TileMoveDijkstra tileMoveDijkstra = new TileMoveDijkstra(tilePosition, destinationPosition);
             ChangeMovement(tileMoveDijkstra);
         }
@@ -61,19 +65,14 @@ namespace TileTransforms
             Movement movement = new Movement(moveData, moveRate);
 
             this.movement = movement;
-            this.movement.FinishPublisher += MovementFinishSubscriber;
         }
 
         private bool IsAllowedChangeMovement(IMoveDataCreater moveDataCreater)
         {
             if (!moveDataCreater.IsSuccess()) return false;
             if (movement == null) return true;
-            if (movement.finish) return true;
+            if (movement.IsCompleted()) return true;
             return false;
-        }
-        private void MovementFinishSubscriber()
-        {
-            tilePosition = movement.GetTilePosition();
         }
 
         public bool Equals(TileTransform other)

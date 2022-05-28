@@ -1,4 +1,4 @@
-﻿using System;
+﻿using System.Threading.Tasks;
 using UnityEngine;
 
 namespace TileTransforms.Movements
@@ -11,9 +11,6 @@ namespace TileTransforms.Movements
         private TilePosition nextPosition;
         public float speed = 1;
         private float setNextPositionTime;
-        public bool finish { get; private set; }
-
-        public event Action FinishPublisher;
 
         public Movement(MoveData moveData, MoveRate moveRate)
         {
@@ -23,44 +20,39 @@ namespace TileTransforms.Movements
             nextPosition = moveData.GetNextPosition();
             setNextPositionTime = Time.fixedTime;
 
-            FinishPublisher += FinishSubscriber;
+            SetNextPosition();
         }
-        public void Update()
+
+        public Vector2 GetWorldPosition()
         {
-            if ((int)GetTimeFromSetNextPosition() >= 1)
-            {
-                SetNextPosition();
-            }
-
-            if (moveData.finish && !finish && (int)GetTimeFromSetNextPosition() >= 1)
-            {
-                FinishPublisher?.Invoke();
-            }
-        }
-        public void SetNextPosition()
-        {
-            if (moveData.finish) return;
-
-            prevPosition = nextPosition;
-            nextPosition = moveData.GetNextPosition();
-
-            setNextPositionTime = Time.fixedTime;
+            return Vector2.Lerp(prevPosition.GetWorldPosition(), nextPosition.GetWorldPosition(), GetTimeFromSetNextPosition());
         }
         public TilePosition GetTilePosition()
         {
             return nextPosition;
         }
-        public Vector2 GetWorldPosition()
+        public bool IsCompleted()
         {
-            return Vector2.Lerp(prevPosition.GetWorldPosition(), nextPosition.GetWorldPosition(), GetTimeFromSetNextPosition());
+            if (moveData.completed && (int)GetTimeFromSetNextPosition() >= 1) return true;
+            return false;
+        }
+
+        private async void SetNextPosition()
+        {
+            if (moveData.completed) return;
+
+            prevPosition = nextPosition;
+            nextPosition = moveData.GetNextPosition();
+
+            setNextPositionTime = Time.fixedTime;
+
+            float waitTime = 1 / moveRate.value / speed;
+            await Task.Delay((int)waitTime * 1000);
+            SetNextPosition();
         }
         private float GetTimeFromSetNextPosition()
         {
             return (Time.fixedTime - setNextPositionTime) * moveRate.value * speed;
-        }
-        private void FinishSubscriber()
-        {
-            finish = true;
         }
     }
 }

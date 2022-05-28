@@ -6,7 +6,7 @@ namespace TileTransforms.Movements
     public class MoveData
     {
         private List<TilePosition> data;
-        public bool finish { get; private set; }
+        public bool completed { get; private set; }
 
         public MoveData(List<TilePosition> data)
         {
@@ -15,12 +15,12 @@ namespace TileTransforms.Movements
         }
         public TilePosition GetNextPosition()
         {
-            if (finish) return null;
+            if (completed) return null;
 
             TilePosition tilePosition = data[0];
             data.RemoveAt(0);
 
-            if (data.Count == 0) finish = true;
+            if (data.Count == 0) completed = true;
 
             if (tilePosition == null) throw new Exception("move data に null が含まれてます");
 
