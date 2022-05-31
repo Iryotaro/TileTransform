@@ -22,6 +22,8 @@ namespace TileTransforms
         }
         private void Update()
         {
+            transform.position = tilePosition.position;
+
             if (movement == null) return;
 
             tilePosition = movement.GetTilePosition();
