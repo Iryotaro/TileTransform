@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 using TileTransforms.Movements;
@@ -22,7 +23,7 @@ namespace TileTransforms
         }
         private void Update()
         {
-            transform.position = tilePosition.position;
+            transform.position = tilePosition.GetWorldPosition();
 
             if (movement == null) return;
 
