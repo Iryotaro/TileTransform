@@ -47,8 +47,7 @@ namespace TileTransforms.Movements
                 Tile destinationTile = new Tile(destinationPosition, null);
                 searchTiles.Add(currentTile);
 
-                bool found = false;
-                while (!found)
+                while (true)
                 {
                     List<Tile> newSearchTiles = new List<Tile>();
                     List<Tile> newSearchedTiles = new List<Tile>();
