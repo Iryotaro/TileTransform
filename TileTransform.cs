@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
+using UniRx;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 using TileTransforms.Movements;
@@ -9,7 +9,7 @@ namespace TileTransforms
     public class TileTransform : MonoBehaviour, IEquatable<TileTransform>
     {
         public TileTransformId id;
-        public TilePosition tilePosition { get; private set; }
+        public ReactiveProperty<TilePosition> tilePosition { get; private set; } = new ReactiveProperty<TilePosition>();
         public TileDirection tileDirection { get; private set; }
         private Movement movement;
 
@@ -23,18 +23,22 @@ namespace TileTransforms
         }
         private void Update()
         {
-            transform.position = tilePosition.GetWorldPosition();
-
-            if (movement == null) return;
-
-            tilePosition = movement.GetTilePosition();
-            transform.position = movement.GetWorldPosition();
+            if (IsActiveMovement())
+            {
+                TilePosition tilePosition = movement.GetTilePosition();
+                this.tilePosition.Value = tilePosition;
+                transform.position = movement.GetWorldPosition();
+            }
+            else
+            {
+                transform.position = tilePosition.Value.GetWorldPosition();
+            }
         }
-
+        
         public void ChangePosition(TilePosition tilePosition)
         {
-            this.tilePosition = tilePosition;
-            transform.position = tilePosition.GetWorldPosition();
+            if (IsActiveMovement()) CancelMovement();
+            this.tilePosition.Value = tilePosition;
         }
         public void ChangeDirection(TileDirection tileDirection)
         {
@@ -45,14 +49,14 @@ namespace TileTransforms
         {
             if (direction == null) throw new ArgumentNullException(nameof(direction));
 
-            MoveTranslate moveData = new MoveTranslate(tilePosition, direction);
+            MoveTranslate moveData = new MoveTranslate(tilePosition.Value, direction);
             ChangeMovement(moveData, moveRate);
         }
         public void Dijkstra(TilePosition destinationPosition, MoveRate moveRate)
         {
             if (destinationPosition == null) throw new ArgumentNullException(nameof(destinationPosition));
 
-            TileMoveDijkstra tileMoveDijkstra = new TileMoveDijkstra(tilePosition, destinationPosition);
+            MoveDijkstra tileMoveDijkstra = new MoveDijkstra(tilePosition.Value, destinationPosition);
             ChangeMovement(tileMoveDijkstra, moveRate);
         }
 
@@ -66,12 +70,22 @@ namespace TileTransforms
             this.movement = movement;
         }
 
+        public void CancelMovement()
+        {
+            if (!IsActiveMovement()) return;
+            movement.Cancel();
+        }
+
         private bool IsAllowedChangeMovement(IMoveDataCreater moveDataCreater)
         {
             if (!moveDataCreater.IsSuccess()) return false;
-            if (movement == null) return true;
-            if (movement.IsCompleted()) return true;
-            return false;
+            if (IsActiveMovement()) return false;
+            return true;
+        }
+        private bool IsActiveMovement()
+        {
+            if (movement == null || movement.IsCompleted()) return false;
+            return true;
         }
 
         public bool Equals(TileTransform other)

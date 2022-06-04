@@ -10,16 +10,22 @@ namespace TileTransforms.Movements
         private TilePosition prevPosition;
         private TilePosition nextPosition;
         private float setNextPositionTime;
+        private bool cancel = false;
 
         public Movement(MoveData moveData, MoveRate moveRate)
         {
             this.moveData = moveData;
             this.moveRate = moveRate;
             prevPosition = moveData.GetNextPosition();
-            nextPosition = moveData.GetNextPosition();
+            nextPosition = prevPosition;
             setNextPositionTime = Time.fixedTime;
 
             SetNextPosition();
+        }
+
+        public void Cancel()
+        {
+            cancel = true;
         }
 
         public Vector2 GetWorldPosition()
@@ -32,13 +38,14 @@ namespace TileTransforms.Movements
         }
         public bool IsCompleted()
         {
-            if (moveData.completed && (int)GetTimeFromSetNextPosition() >= 1) return true;
+            if ((moveData.completed || cancel) && (int)GetTimeFromSetNextPosition() >= 1) return true;
             return false;
         }
 
         private async void SetNextPosition()
         {
             if (moveData.completed) return;
+            if (cancel) return;
 
             prevPosition = nextPosition;
             nextPosition = moveData.GetNextPosition();

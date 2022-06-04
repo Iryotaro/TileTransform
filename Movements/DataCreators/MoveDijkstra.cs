@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace TileTransforms.Movements
 {
-    public class TileMoveDijkstra : IMoveDataCreater
+    public class MoveDijkstra : IMoveDataCreater
     {
         private MoveData moveData;
 
@@ -11,7 +11,7 @@ namespace TileTransforms.Movements
         private List<Tile> searchedTiles = new List<Tile>();
         private bool success;
 
-        public TileMoveDijkstra(TilePosition currentPosition, TilePosition destinationPosition)
+        public MoveDijkstra(TilePosition currentPosition, TilePosition destinationPosition)
         {
             CreateData(currentPosition, destinationPosition);
         }
@@ -38,6 +38,13 @@ namespace TileTransforms.Movements
                 }
 
                 data.Reverse();
+
+                if (data.Count < 2)
+                {
+                    success = false;
+                    return;
+                }
+
                 moveData = new MoveData(data);
             }
 
