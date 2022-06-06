@@ -20,7 +20,14 @@ namespace TileTransforms
         {
             ChangePosition(new TilePosition(transform.position, tilemap));
             ChangeDirection(tileDirection = new TileDirection(TileDirection.Direction.Down));
+
+            GetManager().Save(this);
         }
+        private void OnDestroy()
+        {
+            GetManager().Delete(this);
+        }
+
         private void Update()
         {
             if (IsActiveMovement())
@@ -33,6 +40,11 @@ namespace TileTransforms
             {
                 transform.position = tilePosition.Value.GetWorldPosition();
             }
+        }
+
+        public TileTransformManager GetManager()
+        {
+            return TileTransformManager.Instance;
         }
         
         public void ChangePosition(TilePosition tilePosition)
