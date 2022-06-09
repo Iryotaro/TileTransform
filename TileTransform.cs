@@ -14,11 +14,11 @@ namespace TileTransforms
         private Movement movement;
 
         [SerializeField]
-        private Tilemap tilemap;
+        private Tilemap[] tilemaps;
 
         private void Awake()
         {
-            ChangePosition(new TilePosition(transform.position, tilemap));
+            ChangePosition(new TilePosition(transform.position, tilemaps));
             ChangeDirection(tileDirection = new TileDirection(TileDirection.Direction.Down));
 
             GetManager().Save(this);

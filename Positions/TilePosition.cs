@@ -6,33 +6,43 @@ namespace TileTransforms
 {
     public class TilePosition : IEquatable<TilePosition>
     {
-        public Vector3Int position { get; }
-        private Tilemap tilemap { get; }
+        public (Vector3Int value, Tilemap tilemap) position { get; }
+        private Tilemap[] tilemaps { get; }
 
-        public TilePosition(Vector3 worldPosition, Tilemap tilemap)
+        public TilePosition(Vector3 worldPosition, Tilemap[] tilemaps)
         {
             if (worldPosition == null) throw new ArgumentNullException(nameof(worldPosition));
-            if (tilemap == null) throw new ArgumentNullException(nameof(tilemap));
+            if (tilemaps == null) throw new ArgumentNullException(nameof(tilemaps));
 
-            this.tilemap = tilemap;
-            position = this.tilemap.WorldToCell(worldPosition);
+            this.tilemaps = tilemaps;
 
-            if (this.tilemap.GetTile(position) == null) throw new Exception("タイルから外れています");
+            foreach (Tilemap tilemap in tilemaps)
+            {
+                position = (tilemap.WorldToCell(worldPosition), tilemap);
+                if (tilemap.GetTile(position.value) != null) return;
+            }
+
+            throw new Exception("タイルから外れています");
         }
         public TilePosition GetAroundTile(TileDirection tileDirection)
         {
-            Vector3 nowPosition = tilemap.CellToWorld(position);
-            Vector3 direction = tileDirection.GetVector2();
-            Vector3 distanceEachTile = Vector3.Scale(tilemap.cellSize + tilemap.cellGap, tilemap.transform.lossyScale);
+            foreach (Tilemap tilemap in tilemaps)
+            {
+                Vector3 nowPosition = tilemap.CellToWorld(tilemap.WorldToCell(GetWorldPosition()));
+                Vector3 direction = tileDirection.GetVector2();
+                Vector3 distanceEachTile = Vector3.Scale(tilemap.cellSize + tilemap.cellGap, tilemap.transform.lossyScale);
 
-            Vector3 aroundTilePosition = nowPosition + Vector3.Scale(direction, distanceEachTile);
+                Vector3 aroundTilePosition = nowPosition + Vector3.Scale(direction, distanceEachTile);
 
-            if (tilemap.GetTile(tilemap.WorldToCell(aroundTilePosition)) == null) return null;
-            else return new TilePosition(aroundTilePosition, tilemap);
+                if (tilemap.GetTile(tilemap.WorldToCell(aroundTilePosition)) != null) return new TilePosition(aroundTilePosition, tilemaps);
+            }
+
+            return null;
         }
         public Vector2 GetWorldPosition()
         {
-            return tilemap.CellToWorld(position) + Vector3.Scale(tilemap.cellSize, tilemap.transform.lossyScale) / 2;
+            Tilemap tilemap = position.tilemap;
+            return tilemap.CellToWorld(position.value) + Vector3.Scale(tilemap.cellSize, tilemap.transform.lossyScale) / 2;
         }
 
         public bool Equals(TilePosition other)
