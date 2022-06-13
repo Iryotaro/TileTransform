@@ -24,6 +24,27 @@ namespace Ryocatusn.TileTransforms
 
             throw new Exception("タイルから外れています");
         }
+        public TilePosition(Vector3Int value, Tilemap[] tilemaps)
+        {
+            if (value == null) throw new ArgumentNullException(nameof(value));
+            if (tilemaps == null) throw new ArgumentNullException(nameof(tilemaps));
+
+            this.tilemaps = tilemaps;
+
+            foreach (Tilemap tilemap in tilemaps)
+            {
+                position = (value, tilemap);
+                if (tilemap.GetTile(position.value) != null) return;
+            }
+
+            throw new Exception("タイルから外れています");
+        }
+
+        public TilePosition ChangeTilemap(Tilemap[] tilemaps)
+        {
+            return new TilePosition(position.value, tilemaps);
+        }
+
         public TilePosition GetAroundTile(TileDirection tileDirection)
         {
             foreach (Tilemap tilemap in tilemaps)

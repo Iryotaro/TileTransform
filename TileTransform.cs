@@ -46,6 +46,13 @@ namespace Ryocatusn.TileTransforms
         {
             return TileTransformManager.Instance;
         }
+
+        public void ChangeTilemap(Tilemap[] tilemaps)
+        {
+            movement.Cancel();
+
+            tilePosition.Value = tilePosition.Value.ChangeTilemap(tilemaps);
+        }
         
         public void ChangePosition(TilePosition tilePosition)
         {
