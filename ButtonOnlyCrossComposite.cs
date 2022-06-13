@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.Layouts;
 using UnityEngine.InputSystem.Utilities;
-using TileTransforms;
+using Ryocatusn.TileTransforms;
 #if UNITY_EDITOR
 using UnityEditor;
 #endif

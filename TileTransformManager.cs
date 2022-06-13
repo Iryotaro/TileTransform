@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace TileTransforms
+namespace Ryocatusn.TileTransforms
 {
     public class TileTransformManager
     {
@@ -8,19 +8,19 @@ namespace TileTransforms
         private TileTransformManager() { }
 
 
-        private List<TileTransform> tileTransforms = new List<TileTransform>();
+        private List<TileTransform> Ryocatusn.TileTransforms = new List<TileTransform>();
 
         public void Save(TileTransform tileTransform)
         {
-            tileTransforms.Add(tileTransform);
+            Ryocatusn.TileTransforms.Add(tileTransform);
         }
         public TileTransform[] FindByPosition(TilePosition tilePosition)
         {
-            return tileTransforms.FindAll(x => x.tilePosition.Value.Equals(tilePosition)).ToArray();
+            return Ryocatusn.TileTransforms.FindAll(x => x.tilePosition.Value.Equals(tilePosition)).ToArray();
         }
         public void Delete(TileTransform tileTransform)
         {
-            tileTransforms.Remove(tileTransform);
+            Ryocatusn.TileTransforms.Remove(tileTransform);
         }
     }
 }

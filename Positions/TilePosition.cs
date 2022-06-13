@@ -2,7 +2,7 @@
 using UnityEngine;
 using UnityEngine.Tilemaps;
 
-namespace TileTransforms
+namespace Ryocatusn.TileTransforms
 {
     public class TilePosition : IEquatable<TilePosition>
     {

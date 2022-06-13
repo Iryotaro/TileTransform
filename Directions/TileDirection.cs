@@ -1,7 +1,7 @@
 ﻿using System;
 using UnityEngine;
 
-namespace TileTransforms
+namespace Ryocatusn.TileTransforms
 {
     public class TileDirection
     {

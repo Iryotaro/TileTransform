@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace TileTransforms
+namespace Ryocatusn.TileTransforms
 {
     public class TileTransformId : IEquatable<TileTransformId>
     {

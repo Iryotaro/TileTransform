@@ -2,9 +2,9 @@
 using UniRx;
 using UnityEngine;
 using UnityEngine.Tilemaps;
-using TileTransforms.Movements;
+using Ryocatusn.TileTransforms.Movements;
 
-namespace TileTransforms
+namespace Ryocatusn.TileTransforms
 {
     public class TileTransform : MonoBehaviour, IEquatable<TileTransform>
     {
