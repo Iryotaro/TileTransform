@@ -13,12 +13,22 @@ namespace Ryocatusn.TileTransforms
         public TileDirection tileDirection { get; private set; }
         private Movement movement;
 
+        private bool enable = true;
+
         [SerializeField]
         private Tilemap[] tilemaps;
 
         private void Awake()
         {
-            ChangePosition(new TilePosition(transform.position, tilemaps));
+            try
+            {
+                ChangePosition(new TilePosition(transform.position, tilemaps));
+            }
+            catch
+            {
+                SetDisable();
+            }
+            
             ChangeDirection(tileDirection = new TileDirection(TileDirection.Direction.Down));
 
             GetManager().Save(this);
@@ -30,6 +40,8 @@ namespace Ryocatusn.TileTransforms
 
         private void Update()
         {
+            if (!enable) return;
+
             if (IsActiveMovement())
             {
                 TilePosition tilePosition = movement.GetTilePosition();
@@ -47,6 +59,24 @@ namespace Ryocatusn.TileTransforms
             return TileTransformManager.Instance;
         }
 
+        public void SetEnable()
+        {
+            enable = true;
+
+            try
+            {
+                ChangePosition(new TilePosition(transform.position, tilemaps));
+            }
+            catch
+            {
+                enable = false;
+            }
+        }
+        public void SetDisable()
+        {
+            enable = false;
+        }
+
         public void ChangeTilemap(Tilemap[] tilemaps)
         {
             if (movement != null) movement.Cancel();
@@ -56,11 +86,13 @@ namespace Ryocatusn.TileTransforms
         
         public void ChangePosition(TilePosition tilePosition)
         {
+            if (!enable) return;
             if (IsActiveMovement()) CancelMovement();
             this.tilePosition.Value = tilePosition;
         }
         public void ChangeDirection(TileDirection tileDirection)
         {
+            if (!enable) return;
             this.tileDirection = tileDirection;
         }
 
@@ -81,6 +113,7 @@ namespace Ryocatusn.TileTransforms
 
         public void ChangeMovement(IMoveDataCreater moveDataCreater, MoveRate moveRate)
         {
+            if (!enable) return;
             if (!IsAllowedChangeMovement(moveDataCreater)) return;
 
             MoveData moveData = moveDataCreater.GetData();
