@@ -17,6 +17,12 @@ namespace Ryocatusn.TileTransforms.Movements
         }
         private void CreateData(TilePosition currentPosition, TilePosition destinationPosition)
         {
+            if (currentPosition == null || destinationPosition == null)
+            {
+                success = false;
+                return;
+            }
+
             Tile destinationTile = GetDestinationTile();
 
             if (destinationTile == null)

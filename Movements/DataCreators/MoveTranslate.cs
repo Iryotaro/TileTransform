@@ -8,6 +8,12 @@ namespace Ryocatusn.TileTransforms.Movements
 
         public MoveTranslate(TilePosition position, TileDirection tileDirection)
         {
+            if (position == null)
+            {
+                moveData = null;
+                return;
+            }
+
             TilePosition nextPosition = position.GetAroundTile(tileDirection);
 
             if (nextPosition == null) moveData = null;
