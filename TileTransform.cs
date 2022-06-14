@@ -75,6 +75,8 @@ namespace Ryocatusn.TileTransforms
         public void SetDisable()
         {
             enable = false;
+            tilePosition = null;
+            movement = null;
         }
 
         public void ChangeTilemap(Tilemap[] tilemaps)
