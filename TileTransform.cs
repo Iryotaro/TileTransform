@@ -49,7 +49,7 @@ namespace Ryocatusn.TileTransforms
 
         public void ChangeTilemap(Tilemap[] tilemaps)
         {
-            movement.Cancel();
+            if (movement != null) movement.Cancel();
 
             tilePosition.Value = tilePosition.Value.ChangeTilemap(tilemaps);
         }
