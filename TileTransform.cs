@@ -76,6 +76,7 @@ namespace Ryocatusn.TileTransforms
         {
             enable = false;
             tilePosition.Value = null;
+            if (movement != null) movement.Cancel();
             movement = null;
         }
 
