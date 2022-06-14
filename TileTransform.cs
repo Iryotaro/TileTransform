@@ -81,7 +81,8 @@ namespace Ryocatusn.TileTransforms
         {
             if (movement != null) movement.Cancel();
 
-            tilePosition.Value = tilePosition.Value.ChangeTilemap(tilemaps);
+            if (tilePosition.Value != null) tilePosition.Value = tilePosition.Value.ChangeTilemap(tilemaps);
+            this.tilemaps = tilemaps;
         }
         
         public void ChangePosition(TilePosition tilePosition)
