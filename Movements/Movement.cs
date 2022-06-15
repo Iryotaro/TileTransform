@@ -50,9 +50,16 @@ namespace Ryocatusn.TileTransforms.Movements
             await Move().WithCancellation(moveCancellationToken.Token);
         }
 
+        //Cancelは切りのいいところまで進むんでから終了する対してKillはすぐに終了させる
+        //普段はCancelを使う
+        //Tilemapがnullになってしまう場合などにKillを使用
         public void Cancel()
         {
             cancel = true;
+        }
+        public void Kill()
+        {
+            completeEvent.OnNext(Unit.Default);
         }
 
         private IEnumerator Move()

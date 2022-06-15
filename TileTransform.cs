@@ -67,7 +67,7 @@ namespace Ryocatusn.TileTransforms
         }
         public void SetDisable()
         {
-            CancelMovement();
+            movement.Match(Some: x => x.Kill());
 
             tilePosition.Set(null);
             enable = false;
@@ -93,7 +93,9 @@ namespace Ryocatusn.TileTransforms
             {
                 tilemap.OnDestroyAsObservable()
                     .FirstOrDefault()
-                    .Subscribe(_ => SetDisable());
+                    .Where(_ => this.tilemaps.ToList().Contains(tilemap))
+                    .Subscribe(_ => movement.Match(Some: _ => SetDisable()))
+                    .AddTo(this);
             }
 
             SetEnable();
