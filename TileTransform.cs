@@ -22,18 +22,8 @@ namespace Ryocatusn.TileTransforms
 
         private void Awake()
         {
-            try
-            {
-                ChangePosition(new TilePosition(transform.position, tilemaps));
-            }
-            catch
-            {
-                SetDisable();
-            }
-
+            ChangeTilemap(tilemaps, transform.position);
             ChangeDirection(tileDirection = new TileDirection(TileDirection.Direction.Down));
-
-            ChangeTilemap(tilemaps);
 
             this.UpdateAsObservable()
                 .Where(_ => enable)
@@ -77,14 +67,14 @@ namespace Ryocatusn.TileTransforms
         {
             CancelMovement();
 
-            this.tilePosition.Set(tilePosition);
+            this.tilePosition.Set(new TilePosition(tilePosition.position.value, tilemaps));
         }
         public void ChangeDirection(TileDirection tileDirection)
         {
             this.tileDirection = tileDirection;
         }
 
-        public void ChangeTilemap(Tilemap[] tilemaps)
+        public void ChangeTilemap(Tilemap[] tilemaps, TilePosition startTilePosition)
         {
             SetDisable();
 
@@ -97,6 +87,24 @@ namespace Ryocatusn.TileTransforms
                     .Subscribe(_ => movement.Match(Some: _ => SetDisable()))
                     .AddTo(this);
             }
+            transform.position = startTilePosition.GetWorldPosition();
+
+            SetEnable();
+        }
+        public void ChangeTilemap(Tilemap[] tilemaps, Vector2 startWorldPosition)
+        {
+            SetDisable();
+
+            this.tilemaps = tilemaps;
+            foreach (Tilemap tilemap in this.tilemaps)
+            {
+                tilemap.OnDestroyAsObservable()
+                    .FirstOrDefault()
+                    .Where(_ => this.tilemaps.ToList().Contains(tilemap))
+                    .Subscribe(_ => movement.Match(Some: _ => SetDisable()))
+                    .AddTo(this);
+            }
+            transform.position = startWorldPosition;
 
             SetEnable();
         }
