@@ -1,7 +1,9 @@
 ﻿using System;
 using UniRx;
+using UniRx.Triggers;
 using UnityEngine;
 using UnityEngine.Tilemaps;
+using Ryocatusn.TileTransforms.Util;
 using Ryocatusn.TileTransforms.Movements;
 
 namespace Ryocatusn.TileTransforms
@@ -9,10 +11,9 @@ namespace Ryocatusn.TileTransforms
     public class TileTransform : MonoBehaviour, IEquatable<TileTransform>
     {
         public TileTransformId id;
-        public ReactiveProperty<TilePosition> tilePosition { get; private set; } = new ReactiveProperty<TilePosition>();
+        public Option<TilePosition> tilePosition { get; private set; } = new Option<TilePosition>(null);
         public TileDirection tileDirection { get; private set; }
-        private Movement movement;
-
+        private Option<Movement> movement = new Option<Movement>(null);
         private bool enable = true;
 
         [SerializeField]
@@ -28,30 +29,19 @@ namespace Ryocatusn.TileTransforms
             {
                 SetDisable();
             }
-            
+
             ChangeDirection(tileDirection = new TileDirection(TileDirection.Direction.Down));
+
+            this.UpdateAsObservable()
+                .Where(_ => enable)
+                .Where(_ => !IsEnableMovement())
+                .Subscribe(_ => SetPositionWhenDisableMovement());
 
             GetManager().Save(this);
         }
         private void OnDestroy()
         {
             GetManager().Delete(this);
-        }
-
-        private void Update()
-        {
-            if (!enable) return;
-
-            if (IsActiveMovement())
-            {
-                TilePosition tilePosition = movement.GetTilePosition();
-                this.tilePosition.Value = tilePosition;
-                transform.position = movement.GetWorldPosition();
-            }
-            else
-            {
-                transform.position = tilePosition.Value.GetWorldPosition();
-            }
         }
 
         public TileTransformManager GetManager()
@@ -69,79 +59,73 @@ namespace Ryocatusn.TileTransforms
             }
             catch
             {
-                enable = false;
+                SetDisable();
             }
         }
         public void SetDisable()
         {
+            CancelMovement();
+
             enable = false;
-            tilePosition.Value = null;
-            if (movement != null) movement.Cancel();
-            movement = null;
+        }
+
+        public void ChangePosition(TilePosition tilePosition)
+        {
+            CancelMovement();
+
+            this.tilePosition.Set(tilePosition);
+        }
+        public void ChangeDirection(TileDirection tileDirection)
+        {
+            this.tileDirection = tileDirection;
         }
 
         public void ChangeTilemap(Tilemap[] tilemaps)
         {
-            if (movement != null) movement.Cancel();
-
-            if (tilePosition.Value != null) tilePosition.Value = tilePosition.Value.ChangeTilemap(tilemaps);
+            SetDisable();
             this.tilemaps = tilemaps;
-        }
-        
-        public void ChangePosition(TilePosition tilePosition)
-        {
-            if (!enable) return;
-            if (IsActiveMovement()) CancelMovement();
-            this.tilePosition.Value = tilePosition;
-        }
-        public void ChangeDirection(TileDirection tileDirection)
-        {
-            if (!enable) return;
-            this.tileDirection = tileDirection;
-        }
-
-        public void Translate(TileDirection direction, MoveRate moveRate)
-        {
-            if (direction == null) throw new ArgumentNullException(nameof(direction));
-
-            MoveTranslate moveData = new MoveTranslate(tilePosition.Value, direction);
-            ChangeMovement(moveData, moveRate);
-        }
-        public void Dijkstra(TilePosition destinationPosition, MoveRate moveRate)
-        {
-            if (destinationPosition == null) throw new ArgumentNullException(nameof(destinationPosition));
-
-            MoveDijkstra tileMoveDijkstra = new MoveDijkstra(tilePosition.Value, destinationPosition);
-            ChangeMovement(tileMoveDijkstra, moveRate);
-        }
-
-        public void ChangeMovement(IMoveDataCreater moveDataCreater, MoveRate moveRate)
-        {
-            if (!enable) return;
-            if (!IsAllowedChangeMovement(moveDataCreater)) return;
-
-            MoveData moveData = moveDataCreater.GetData();
-            Movement movement = new Movement(moveData, moveRate);
-
-            this.movement = movement;
+            SetEnable();
         }
 
         public void CancelMovement()
         {
-            if (!IsActiveMovement()) return;
-            movement.Cancel();
+            movement.Match(Some: x => x.Cancel());
         }
 
-        private bool IsAllowedChangeMovement(IMoveDataCreater moveDataCreater)
+        public void SetMovement(IMoveDataCreater moveDataCreater, MoveRate moveRate)
         {
+            if (!IsAllowedSetMovement(moveDataCreater)) return;
+
+            MoveData moveData = moveDataCreater.GetData();
+            movement.Set(new Movement(moveData, moveRate));
+
+            movement.Match(Some: x =>
+            {
+                x.ChangeTilePositionEvent.Subscribe(x => tilePosition.Set(x)).AddTo(this);
+                x.ChangeWorldPositionEvent.Subscribe(x => transform.position = x).AddTo(this);
+            });
+        }
+
+        private bool IsAllowedSetMovement(IMoveDataCreater moveDataCreater)
+        {
+            if (!enable) return false;
             if (!moveDataCreater.IsSuccess()) return false;
-            if (IsActiveMovement()) return false;
+            if (IsEnableMovement()) return false;
             return true;
         }
-        private bool IsActiveMovement()
+        private bool IsEnableMovement()
         {
-            if (movement == null || movement.IsCompleted()) return false;
+            Movement movement = this.movement.Get();
+
+            if (movement == null) return false;
+            if (movement.isCompleted) return false;
+
             return true;
+        }
+
+        private void SetPositionWhenDisableMovement()
+        {
+            tilePosition.Match(Some: x => transform.position = x.GetWorldPosition());
         }
 
         public bool Equals(TileTransform other)

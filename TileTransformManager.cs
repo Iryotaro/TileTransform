@@ -16,7 +16,7 @@ namespace Ryocatusn.TileTransforms
         }
         public TileTransform[] FindByPosition(TilePosition tilePosition)
         {
-            return tileTransforms.FindAll(x => x.tilePosition.Value.Equals(tilePosition)).ToArray();
+            return tileTransforms.FindAll(x => x.tilePosition.Equals(tilePosition)).ToArray();
         }
         public void Delete(TileTransform tileTransform)
         {

@@ -1,4 +1,8 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Collections;
+using System.Threading;
+using Cysharp.Threading.Tasks;
+using UniRx;
 using UnityEngine;
 
 namespace Ryocatusn.TileTransforms.Movements
@@ -9,18 +13,41 @@ namespace Ryocatusn.TileTransforms.Movements
         private MoveRate moveRate { get; }
         private TilePosition prevPosition;
         private TilePosition nextPosition;
-        private float setNextPositionTime;
+        public bool isCompleted { get; private set; } = false;
         private bool cancel = false;
+        private IDisposable moveUpdateDisposable;
+        private CancellationTokenSource moveCancellationToken;
+
+        private Subject<TilePosition> changeTilePositionEvent = new Subject<TilePosition>();
+        private Subject<Vector2> changeWorldPositionEvent = new Subject<Vector2>();
+        private Subject<Unit> completeEvent = new Subject<Unit>();
+
+        public IObservable<TilePosition> ChangeTilePositionEvent => changeTilePositionEvent;
+        public IObservable<Vector2> ChangeWorldPositionEvent => changeWorldPositionEvent;
+        public IObservable<Unit> CompleteEvent;
 
         public Movement(MoveData moveData, MoveRate moveRate)
         {
             this.moveData = moveData;
             this.moveRate = moveRate;
-            prevPosition = moveData.GetNextPosition();
-            nextPosition = prevPosition;
-            setNextPositionTime = Time.fixedTime;
 
-            SetNextPosition();
+            StartMove().Forget();
+
+            CompleteEvent = completeEvent.FirstOrDefault();
+
+            CompleteEvent.Subscribe(_ =>
+            {
+                isCompleted = true;
+                if (moveUpdateDisposable != null) moveUpdateDisposable.Dispose();
+                moveCancellationToken.Cancel();
+                moveCancellationToken.Dispose();
+                Dispose();
+            });
+        }
+        private async UniTaskVoid StartMove()
+        {
+            moveCancellationToken = new CancellationTokenSource();
+            await Move().WithCancellation(moveCancellationToken.Token);
         }
 
         public void Cancel()
@@ -28,37 +55,45 @@ namespace Ryocatusn.TileTransforms.Movements
             cancel = true;
         }
 
-        public Vector2 GetWorldPosition()
+        private IEnumerator Move()
         {
-            return Vector2.Lerp(prevPosition.GetWorldPosition(), nextPosition.GetWorldPosition(), GetTimeFromSetNextPosition());
+            int index = 1;
+            while (index <= moveData.GetCount() - 1)
+            {
+                if (cancel)
+                {
+                    completeEvent.OnNext(Unit.Default);
+                    break;
+                }
+
+                prevPosition = moveData[index - 1];
+                nextPosition = moveData[index];
+                index++;
+
+                float setNextPosition = Time.fixedTime;
+
+                moveUpdateDisposable = Observable.EveryUpdate().ObserveOn(Scheduler.MainThread)
+                    .Subscribe(x => Update((Time.fixedTime - setNextPosition) * moveRate.value));
+
+                yield return new WaitForSeconds(1 / moveRate.value);
+
+                moveUpdateDisposable.Dispose();
+                moveUpdateDisposable = null;
+            }
+            completeEvent.OnNext(Unit.Default);
         }
-        public TilePosition GetTilePosition()
+        private void Update(float time)
         {
-            return nextPosition;
-        }
-        public bool IsCompleted()
-        {
-            if ((moveData.completed || cancel) && (int)GetTimeFromSetNextPosition() >= 1) return true;
-            return false;
+            Vector2 worldPosition = Vector2.Lerp(prevPosition.GetWorldPosition(), nextPosition.GetWorldPosition(), time);
+            changeTilePositionEvent.OnNext(nextPosition);
+            changeWorldPositionEvent.OnNext(worldPosition);
         }
 
-        private async void SetNextPosition()
+        private void Dispose()
         {
-            if (moveData.completed) return;
-            if (cancel) return;
-
-            prevPosition = nextPosition;
-            nextPosition = moveData.GetNextPosition();
-
-            setNextPositionTime = Time.fixedTime;
-
-            float waitTime = 1 / moveRate.value;
-            await Task.Delay((int)(waitTime * 1000));
-            SetNextPosition();
-        }
-        private float GetTimeFromSetNextPosition()
-        {
-            return (Time.fixedTime - setNextPositionTime) * moveRate.value;
+            changeTilePositionEvent.Dispose();
+            changeWorldPositionEvent.Dispose();
+            completeEvent.Dispose();
         }
     }
 }
