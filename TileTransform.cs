@@ -33,12 +33,7 @@ namespace Ryocatusn.TileTransforms
 
             ChangeDirection(tileDirection = new TileDirection(TileDirection.Direction.Down));
 
-            foreach (Tilemap tilemap in tilemaps)
-            {
-                tilemap.OnDestroyAsObservable()
-                    .FirstOrDefault()
-                    .Subscribe(_ => SetDisable());
-            }
+            ChangeTilemap(tilemaps);
 
             this.UpdateAsObservable()
                 .Where(_ => enable)
@@ -92,7 +87,15 @@ namespace Ryocatusn.TileTransforms
         public void ChangeTilemap(Tilemap[] tilemaps)
         {
             SetDisable();
+
             this.tilemaps = tilemaps;
+            foreach (Tilemap tilemap in this.tilemaps)
+            {
+                tilemap.OnDestroyAsObservable()
+                    .FirstOrDefault()
+                    .Subscribe(_ => SetDisable());
+            }
+
             SetEnable();
         }
 
