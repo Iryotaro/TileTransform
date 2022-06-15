@@ -40,17 +40,10 @@ namespace Ryocatusn.TileTransforms
             throw new Exception("タイルから外れています");
         }
 
-        public TilePosition ChangeTilemap(Tilemap[] tilemaps)
-        {
-            return new TilePosition(position.value, tilemaps);
-        }
-
         public TilePosition GetAroundTile(TileDirection tileDirection)
         {
             foreach (Tilemap tilemap in tilemaps)
             {
-                if (tilemap == null) continue;
-
                 Vector3 nowPosition = tilemap.CellToWorld(tilemap.WorldToCell(GetWorldPosition()));
                 Vector3 direction = tileDirection.GetVector2();
                 Vector3 distanceEachTile = Vector3.Scale(tilemap.cellSize + tilemap.cellGap, tilemap.transform.lossyScale);

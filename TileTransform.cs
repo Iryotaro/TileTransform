@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using UniRx;
 using UniRx.Triggers;
 using UnityEngine;
@@ -32,6 +33,13 @@ namespace Ryocatusn.TileTransforms
 
             ChangeDirection(tileDirection = new TileDirection(TileDirection.Direction.Down));
 
+            foreach (Tilemap tilemap in tilemaps)
+            {
+                tilemap.OnDestroyAsObservable()
+                    .FirstOrDefault()
+                    .Subscribe(_ => SetDisable());
+            }
+
             this.UpdateAsObservable()
                 .Where(_ => enable)
                 .Where(_ => !IsEnableMovement())
@@ -55,7 +63,7 @@ namespace Ryocatusn.TileTransforms
 
             try
             {
-                ChangePosition(new TilePosition(transform.position, tilemaps));
+                ChangePosition(new TilePosition(transform.position, tilemaps.ToArray()));
             }
             catch
             {
@@ -66,6 +74,7 @@ namespace Ryocatusn.TileTransforms
         {
             CancelMovement();
 
+            tilePosition.Set(null);
             enable = false;
         }
 
