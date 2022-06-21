@@ -10,6 +10,7 @@ using Ryocatusn.TileTransforms.Movements;
 
 namespace Ryocatusn.TileTransforms
 {
+    [DefaultExecutionOrder(-100)]
     public class TileTransform : MonoBehaviour, IEquatable<TileTransform>
     {
         public TileTransformId id;
