@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using UniRx;
 using UniRx.Triggers;
@@ -15,14 +16,17 @@ namespace Ryocatusn.TileTransforms
         public Option<TilePosition> tilePosition { get; private set; } = new Option<TilePosition>(null);
         public TileDirection tileDirection { get; private set; }
         private Option<Movement> movement = new Option<Movement>(null);
+        public List<Tilemap> tilemaps { get; private set; }
         private bool enable = true;
 
         [SerializeField]
-        private Tilemap[] tilemaps;
+        private List<Tilemap> m_tilemaps;
 
         private void Awake()
         {
-            ChangeTilemap(tilemaps, transform.position);
+            tilemaps = m_tilemaps;
+
+            ChangeTilemap(tilemaps.ToArray(), transform.position);
             ChangeDirection(tileDirection = new TileDirection(TileDirection.Direction.Down));
 
             this.UpdateAsObservable()
@@ -67,7 +71,7 @@ namespace Ryocatusn.TileTransforms
         {
             CancelMovement();
 
-            this.tilePosition.Set(new TilePosition(tilePosition.position.value, tilemaps));
+            this.tilePosition.Set(new TilePosition(tilePosition.position.value, tilemaps.ToArray()));
         }
         public void ChangeDirection(TileDirection tileDirection)
         {
@@ -78,7 +82,7 @@ namespace Ryocatusn.TileTransforms
         {
             SetDisable();
 
-            this.tilemaps = tilemaps;
+            this.tilemaps = tilemaps.ToList();
             foreach (Tilemap tilemap in this.tilemaps)
             {
                 tilemap.OnDestroyAsObservable()
@@ -95,7 +99,7 @@ namespace Ryocatusn.TileTransforms
         {
             SetDisable();
 
-            this.tilemaps = tilemaps;
+            this.tilemaps = tilemaps.ToList();
             foreach (Tilemap tilemap in this.tilemaps)
             {
                 tilemap.OnDestroyAsObservable()
@@ -107,6 +111,20 @@ namespace Ryocatusn.TileTransforms
             transform.position = startWorldPosition;
 
             SetEnable();
+        }
+        public void AddTilemap(Tilemap addTilemap)
+        {
+            tilemaps.Add(addTilemap);
+            foreach (Tilemap tilemap in tilemaps)
+            {
+                tilemap.OnDestroyAsObservable()
+                    .FirstOrDefault()
+                    .Where(_ => tilemaps.ToList().Contains(tilemap))
+                    .Subscribe(_ => movement.Match(Some: _ => SetDisable()))
+                    .AddTo(this);
+            }
+
+            ChangePosition(new TilePosition(transform.position, tilemaps.ToArray()));
         }
 
         public void CancelMovement()
