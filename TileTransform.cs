@@ -124,7 +124,11 @@ namespace Ryocatusn.TileTransforms
                     .AddTo(this);
             }
 
-            ChangePosition(new TilePosition(transform.position, tilemaps.ToArray()));
+            movement.Match
+                (
+                Some: x => x.CompleteEvent.Subscribe(_ => ChangePosition(new TilePosition(transform.position, tilemaps.ToArray()))),
+                None: () => ChangePosition(new TilePosition(transform.position, tilemaps.ToArray()))
+                );
         }
 
         public void CancelMovement()
