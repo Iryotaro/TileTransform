@@ -38,10 +38,8 @@ namespace Ryocatusn.TileTransforms.Movements
             CompleteEvent.Subscribe(_ =>
             {
                 isCompleted = true;
-                if (moveUpdateDisposable != null) moveUpdateDisposable.Dispose();
-                moveCancellationToken.Cancel();
-                moveCancellationToken.Dispose();
-                Dispose();
+
+                Observable.NextFrame().Subscribe(_ => Dispose());
             });
         }
         private async UniTaskVoid StartMove()
@@ -98,6 +96,9 @@ namespace Ryocatusn.TileTransforms.Movements
 
         private void Dispose()
         {
+            if (moveUpdateDisposable != null) moveUpdateDisposable.Dispose();
+            moveCancellationToken.Cancel();
+            moveCancellationToken.Dispose();
             changeTilePositionEvent.Dispose();
             changeWorldPositionEvent.Dispose();
             completeEvent.Dispose();
