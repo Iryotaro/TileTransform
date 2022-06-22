@@ -61,7 +61,7 @@ namespace Ryocatusn.TileTransforms
         }
         public void SetDisable()
         {
-            movement.Match(Some: x => x.Kill());
+            if (IsEnableMovement()) movement.Get().Kill();
 
             tilePosition.Set(null);
             enable = false;
