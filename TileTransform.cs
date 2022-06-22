@@ -120,7 +120,8 @@ namespace Ryocatusn.TileTransforms
                 tilemap.OnDestroyAsObservable()
                     .FirstOrDefault()
                     .Where(_ => tilemaps.ToList().Contains(tilemap))
-                    .Subscribe(_ => movement.Match(Some: _ => SetDisable()))
+                    .Where(_ => IsEnableMovement())
+                    .Subscribe(_ => SetDisable())
                     .AddTo(this);
             }
 
