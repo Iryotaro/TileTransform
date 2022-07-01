@@ -73,6 +73,12 @@ namespace Ryocatusn.TileTransforms
 
             this.tilePosition.Set(new TilePosition(tilePosition.position.value, tilemaps.ToArray()));
         }
+        public void ChangePosition(Vector2 worldPosition)
+        {
+            CancelMovement();
+
+            tilePosition.Set(new TilePosition(worldPosition, tilemaps.ToArray()));
+        }
         public void ChangeDirection(TileDirection tileDirection)
         {
             this.tileDirection = tileDirection;
