@@ -26,7 +26,7 @@ namespace Ryocatusn.TileTransforms
         {
             tilemaps = m_tilemaps;
 
-            ChangeTilemap(tilemaps.ToArray(), transform.position);
+            ChangeTilemap(tilemaps != null ? tilemaps.ToArray() : new Tilemap[0], transform.position);
             ChangeDirection(tileDirection = new TileDirection(TileDirection.Direction.Down));
 
             this.UpdateAsObservable()
