@@ -55,6 +55,10 @@ namespace Ryocatusn.TileTransforms
 
             return null;
         }
+        public TilePosition ChangeTilePosition(Tilemap[] tilemaps)
+        {
+            return new TilePosition(position.value, tilemaps);
+        }
         public Vector2 GetWorldPosition()
         {
             Tilemap tilemap = position.tilemap;

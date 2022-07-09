@@ -133,11 +133,22 @@ namespace Ryocatusn.TileTransforms
 
             if (IsEnableMovement())
             {
-                movement.Get().CompleteEvent.Subscribe(_ => ChangePosition(new TilePosition(transform.position, tilemaps.ToArray())));
+                movement.Get().CompleteEvent.Subscribe(_ => 
+                {
+                    tilePosition.Match
+                        (
+                        Some: x => tilePosition.Set(x.ChangeTilePosition(tilemaps.ToArray())),
+                        None: () => ChangePosition(transform.position)
+                        );
+                });
             }
             else
             {
-                ChangePosition(new TilePosition(transform.position, tilemaps.ToArray()));
+                tilePosition.Match
+                    (
+                    Some: x => tilePosition.Set(x.ChangeTilePosition(tilemaps.ToArray())),
+                    None: () => ChangePosition(transform.position)
+                    );
             }
         }
 
