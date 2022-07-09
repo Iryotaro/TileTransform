@@ -15,7 +15,7 @@ namespace Ryocatusn.TileTransforms
         public TileTransformId id;
         public Option<TilePosition> tilePosition { get; private set; } = new Option<TilePosition>(null);
         public TileDirection tileDirection { get; private set; }
-        private Option<Movement> movement = new Option<Movement>(null);
+        public Option<Movement> movement = new Option<Movement>(null);
         public List<Tilemap> tilemaps { get; private set; }
         private bool enable = true;
 
