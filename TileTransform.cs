@@ -69,13 +69,13 @@ namespace Ryocatusn.TileTransforms
 
         public void ChangePosition(TilePosition tilePosition)
         {
-            CancelMovement();
+            StopMovement();
 
             this.tilePosition.Set(new TilePosition(tilePosition.position.value, tilemaps.ToArray()));
         }
         public void ChangePosition(Vector2 worldPosition)
         {
-            CancelMovement();
+            StopMovement();
 
             tilePosition.Set(new TilePosition(worldPosition, tilemaps.ToArray()));
         }
@@ -93,9 +93,7 @@ namespace Ryocatusn.TileTransforms
             {
                 tilemap.OnDestroyAsObservable()
                     .FirstOrDefault()
-                    .Where(_ => this.tilemaps.ToList().Contains(tilemap))
-                    .Subscribe(_ => movement.Match(Some: _ => SetDisable()))
-                    .AddTo(this);
+                    .Subscribe(_ => TilemapOnDestroy());
             }
             transform.position = startTilePosition.GetWorldPosition();
 
@@ -110,9 +108,7 @@ namespace Ryocatusn.TileTransforms
             {
                 tilemap.OnDestroyAsObservable()
                     .FirstOrDefault()
-                    .Where(_ => this.tilemaps.ToList().Contains(tilemap))
-                    .Subscribe(_ => movement.Match(Some: _ => SetDisable()))
-                    .AddTo(this);
+                    .Subscribe(_ => TilemapOnDestroy());
             }
             transform.position = startWorldPosition;
 
@@ -121,15 +117,10 @@ namespace Ryocatusn.TileTransforms
         public void AddTilemap(Tilemap addTilemap)
         {
             tilemaps.Add(addTilemap);
-            foreach (Tilemap tilemap in tilemaps)
-            {
-                tilemap.OnDestroyAsObservable()
-                    .FirstOrDefault()
-                    .Where(_ => tilemaps.ToList().Contains(tilemap))
-                    .Where(_ => IsEnableMovement())
-                    .Subscribe(_ => SetDisable())
-                    .AddTo(this);
-            }
+
+            addTilemap.OnDestroyAsObservable()
+                .FirstOrDefault()
+                .Subscribe(_ => TilemapOnDestroy());
 
             if (IsEnableMovement())
             {
@@ -143,10 +134,38 @@ namespace Ryocatusn.TileTransforms
                 ChangePosition(transform.position);
             }
         }
-
-        public void CancelMovement()
+        public void TilemapOnDestroy()
         {
-            movement.Match(Some: x => x.Cancel());
+            Debug.Log("tilemap on destroy");
+            tilemaps.RemoveAll(x => x == null);
+
+            TilePosition pos = tilePosition.Get();
+
+            if (pos == null) return;
+
+            if (!OnTheRoad(pos))
+            {
+                Debug.Log("tile position isn't on the road");
+                SetDisable();
+                return;
+            }
+
+            if (IsEnableMovement())
+            {
+                if (!movement.Get().IsActiveTilemaps()) SetDisable();
+                if (!movement.Get().IsActiveTilemaps()) Debug.Log("movement has disable tilemaps");
+                else Debug.Log("movement doesn't have disable tilemaps");
+            }
+
+            bool OnTheRoad(TilePosition tilePosition)
+            {
+                return tilePosition.position.tilemap != null;
+            }
+        }
+
+        public void StopMovement()
+        {
+            movement.Match(Some: x => x.Stop());
         }
 
         public void SetMovement(IMoveDataCreater moveDataCreater, MoveRate moveRate)

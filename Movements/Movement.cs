@@ -14,7 +14,7 @@ namespace Ryocatusn.TileTransforms.Movements
         private TilePosition prevPosition;
         private TilePosition nextPosition;
         public bool isCompleted { get; private set; } = false;
-        private bool cancel = false;
+        private bool stop = false;
         private IDisposable moveUpdateDisposable;
         private CancellationTokenSource moveCancellationToken;
 
@@ -47,16 +47,21 @@ namespace Ryocatusn.TileTransforms.Movements
             await Move().WithCancellation(moveCancellationToken.Token);
         }
 
-        //Cancelは切りのいいところまで進むんでから終了する対してKillはすぐに終了させる
-        //普段はCancelを使う
+        //Stopは切りのいいところまで進むんでから終了する対してKillはすぐに終了させる
+        //普段はStopを使う
         //Tilemapがnullになってしまう場合などにKillを使用
-        public void Cancel()
+        public void Stop()
         {
-            cancel = true;
+            stop = true;
         }
         public void Kill()
         {
             completeEvent.OnNext(Unit.Default);
+        }
+
+        public bool IsActiveTilemaps()
+        {
+            return moveData.IsActiveTilemaps();
         }
 
         private IEnumerator Move()
@@ -64,7 +69,7 @@ namespace Ryocatusn.TileTransforms.Movements
             int index = 1;
             while (index <= moveData.GetCount() - 1)
             {
-                if (cancel)
+                if (stop)
                 {
                     completeEvent.OnNext(Unit.Default);
                     break;

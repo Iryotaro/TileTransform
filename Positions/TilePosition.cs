@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 
@@ -14,7 +15,7 @@ namespace Ryocatusn.TileTransforms
             if (worldPosition == null) throw new ArgumentNullException(nameof(worldPosition));
             if (tilemaps == null) throw new ArgumentNullException(nameof(tilemaps));
 
-            this.tilemaps = tilemaps;
+            this.tilemaps = tilemaps.Where(x => x != null).ToArray();
 
             foreach (Tilemap tilemap in tilemaps)
             {
@@ -29,7 +30,7 @@ namespace Ryocatusn.TileTransforms
             if (value == null) throw new ArgumentNullException(nameof(value));
             if (tilemaps == null) throw new ArgumentNullException(nameof(tilemaps));
 
-            this.tilemaps = tilemaps;
+            this.tilemaps = tilemaps.Where(x => x != null).ToArray();
 
             foreach (Tilemap tilemap in tilemaps)
             {
@@ -44,6 +45,8 @@ namespace Ryocatusn.TileTransforms
         {
             foreach (Tilemap tilemap in tilemaps)
             {
+                if (tilemap == null) continue;
+
                 Vector3 nowPosition = tilemap.CellToWorld(tilemap.WorldToCell(GetWorldPosition()));
                 Vector3 direction = tileDirection.GetVector2();
                 Vector3 distanceEachTile = Vector3.Scale(tilemap.cellSize + tilemap.cellGap, tilemap.transform.lossyScale);

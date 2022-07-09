@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Ryocatusn.TileTransforms.Movements
 {
@@ -27,6 +28,10 @@ namespace Ryocatusn.TileTransforms.Movements
         public int GetCount()
         {
             return data.Count;
+        }
+        public bool IsActiveTilemaps()
+        {
+            return data.Where(x => x.position.tilemap == null).Count() == 0;
         }
     }
 }
