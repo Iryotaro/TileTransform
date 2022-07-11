@@ -10,13 +10,10 @@ namespace Ryocatusn.TileTransforms
     public class TilePosition : IEquatable<TilePosition>
     {
         private TilePositionId id { get; }
-        public Vector3Int position { get; }
+        public Vector3Int position { get; private set; }
         private Tilemap tilemap;
         private List<Tilemap> tilemaps;
-
-        private Subject<Unit> outSideRoadEvent = new Subject<Unit>();
-
-        public IObservable<Unit> OutSideRoadEvent;
+        public bool outSideRoad { get; private set; } = false;
 
         public TilePosition(Vector3 worldPosition, List<Tilemap> tilemaps)
         {
@@ -24,8 +21,6 @@ namespace Ryocatusn.TileTransforms
 
             tilemaps.RemoveAll(x => x == null);
             this.tilemaps = tilemaps;
-
-            OutSideRoadEvent = outSideRoadEvent.FirstOrDefault();
 
             foreach (Tilemap tilemap in this.tilemaps)
             {
@@ -38,31 +33,37 @@ namespace Ryocatusn.TileTransforms
                 if (this.tilemap.GetTile(position) != null) return;
             }
 
-            outSideRoadEvent.OnNext(Unit.Default);
+            outSideRoad = true;
         }
 
         private void TilemapOnDestroy(Tilemap destroyTilemap)
         {
-            tilemaps.RemoveAll(x => x.Equals(destroyTilemap));
+            tilemaps.Remove(destroyTilemap);
             tilemaps.RemoveAll(x => x.Equals(null));
+
+            if (tilemap == null) return;
+
+            Vector2 worldPosition = tilemap.CellToWorld(position);
 
             if (tilemap.Equals(destroyTilemap))
             {
                 foreach (Tilemap tilemap in tilemaps)
                 {
                     this.tilemap = tilemap;
+                    position = this.tilemap.WorldToCell(worldPosition);
 
-                    if (this.tilemap.GetTile(position) != null) return;
+                    if (this.tilemap.GetTile(tilemap.WorldToCell(worldPosition)) != null) return;
                 }
-                outSideRoadEvent.OnNext(Unit.Default);
+
+                outSideRoad = true;
             }
         }
         public TilePosition GetAroundTile(TileDirection tileDirection)
         {
+            if (outSideRoad) return null;
+
             foreach (Tilemap tilemap in tilemaps)
             {
-                if (tilemap == null) continue;
-
                 Vector3 nowPosition = tilemap.CellToWorld(tilemap.WorldToCell(GetWorldPosition()));
                 Vector3 direction = tileDirection.GetVector2();
                 Vector3 distanceEachTile = Vector3.Scale(tilemap.cellSize + tilemap.cellGap, tilemap.transform.lossyScale);
@@ -77,11 +78,6 @@ namespace Ryocatusn.TileTransforms
         public Vector3 GetWorldPosition()
         {
             return tilemap.CellToWorld(position) + Vector3.Scale(tilemap.cellSize, tilemap.transform.lossyScale) / 2;
-        }
-
-        public void Delete()
-        {
-            outSideRoadEvent.Dispose();
         }
 
         public bool Equals(TilePosition other)

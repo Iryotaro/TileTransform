@@ -31,23 +31,6 @@ namespace Ryocatusn.TileTransforms.Movements
             this.moveData = moveData;
             this.moveRate = moveRate;
 
-            foreach(TilePosition tilePosition in this.moveData.data)
-            {
-                tilePosition.OutSideRoadEvent
-                    .Subscribe(_ =>
-                    {
-                        if (tilePosition.Equals(nextPosition) || tilePosition.Equals(prevPosition))
-                        {
-                            if (!isCompleted) Kill();
-                        }
-                        else
-                        {
-                            
-                            if (!isCompleted) Stop();
-                        }
-                    });
-            }
-
             StartMove().Forget();
 
             CompleteEvent = completeEvent.FirstOrDefault();
@@ -64,8 +47,6 @@ namespace Ryocatusn.TileTransforms.Movements
         }
 
         //Stopは切りのいいところまで進むんでから終了する対してKillはすぐに終了させる
-        //普段はStopを使う
-        //Tilemapがnullになってしまう場合などにKillを使用
         public void Stop()
         {
             stop = true;
@@ -103,7 +84,7 @@ namespace Ryocatusn.TileTransforms.Movements
                     });
 
                 moveUpdateDisposable = Observable.EveryUpdate()
-                    .ObserveOn(Scheduler.MainThread)
+                    .ObserveOn(Scheduler.MainThreadEndOfFrame)
                     .Subscribe(x => Update((Time.fixedTime - setNextPosition) * moveRate.value));
 
                 yield return new WaitForSeconds(1 / moveRate.value);

@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using UniRx;
-using UniRx.Triggers;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 using Ryocatusn.TileTransforms.Util;
@@ -19,6 +18,8 @@ namespace Ryocatusn.TileTransforms
         public List<Tilemap> tilemaps { get; private set; } = new List<Tilemap>();
         private bool enable = true;
 
+        private ReactiveProperty<bool> isOutSideRoadEvent = new ReactiveProperty<bool>(false);
+
         [SerializeField]
         private List<Tilemap> m_tilemaps;
 
@@ -31,6 +32,10 @@ namespace Ryocatusn.TileTransforms
             ChangePosition(transform.position);
             ChangeDirection(tileDirection = new TileDirection(TileDirection.Direction.Down));
 
+            isOutSideRoadEvent
+                .Where(x => x)
+                .Subscribe(_ => SetDisable());
+
             GetManager().Save(this);
         }
         private void OnDestroy()
@@ -40,7 +45,8 @@ namespace Ryocatusn.TileTransforms
 
         private void Update()
         {
-            if (!IsEnableMovement() && !enable) SetPositionWhenDisableMovement();
+            if (!IsEnableMovement() && enable) SetPositionWhenDisableMovement();
+            tilePosition.Match(Some: x => { if (enable) isOutSideRoadEvent.Value = x.outSideRoad; });
         }
 
         public TileTransformManager GetManager()
@@ -63,10 +69,6 @@ namespace Ryocatusn.TileTransforms
             if (killMovement) KillMovement();
 
             tilePosition.Set(new TilePosition(worldPosition, tilemaps));
-
-            tilePosition.Get().OutSideRoadEvent
-                .Subscribe(_ => SetDisable())
-                .AddTo(this);
         }
         public void ChangeDirection(TileDirection tileDirection)
         {
