@@ -56,6 +56,7 @@ namespace Ryocatusn.TileTransforms
 
         public void SetEnable()
         {
+            ChangePosition(transform.position);
             enable = true;
         }
         public void SetDisable()
