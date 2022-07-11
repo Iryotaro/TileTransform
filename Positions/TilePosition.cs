@@ -1,5 +1,7 @@
 ﻿using System;
-using System.Linq;
+using System.Collections.Generic;
+using UniRx;
+using UniRx.Triggers;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 
@@ -7,40 +9,54 @@ namespace Ryocatusn.TileTransforms
 {
     public class TilePosition : IEquatable<TilePosition>
     {
-        public (Vector3Int value, Tilemap tilemap) position { get; }
-        private Tilemap[] tilemaps { get; }
+        private TilePositionId id { get; }
+        public Vector3Int position { get; }
+        private Tilemap tilemap;
+        private List<Tilemap> tilemaps;
 
-        public TilePosition(Vector3 worldPosition, Tilemap[] tilemaps)
+        private Subject<Unit> outSideRoadEvent = new Subject<Unit>();
+
+        public IObservable<Unit> OutSideRoadEvent;
+
+        public TilePosition(Vector3 worldPosition, List<Tilemap> tilemaps)
         {
-            if (worldPosition == null) throw new ArgumentNullException(nameof(worldPosition));
-            if (tilemaps == null) throw new ArgumentNullException(nameof(tilemaps));
+            id = new TilePositionId(Guid.NewGuid().ToString());
 
-            this.tilemaps = tilemaps.Where(x => x != null).ToArray();
+            tilemaps.RemoveAll(x => x == null);
+            this.tilemaps = tilemaps;
 
-            foreach (Tilemap tilemap in tilemaps)
+            OutSideRoadEvent = outSideRoadEvent.FirstOrDefault();
+
+            foreach (Tilemap tilemap in this.tilemaps)
             {
-                position = (tilemap.WorldToCell(worldPosition), tilemap);
-                if (tilemap.GetTile(position.value) != null) return;
+                this.tilemap = tilemap;
+                position = this.tilemap.WorldToCell(worldPosition);
+
+                this.tilemap.OnDestroyAsObservable()
+                    .Subscribe(_ => TilemapOnDestroy(tilemap));
+
+                if (this.tilemap.GetTile(position) != null) return;
             }
 
-            throw new Exception("タイルから外れています");
+            outSideRoadEvent.OnNext(Unit.Default);
         }
-        public TilePosition(Vector3Int value, Tilemap[] tilemaps)
+
+        private void TilemapOnDestroy(Tilemap destroyTilemap)
         {
-            if (value == null) throw new ArgumentNullException(nameof(value));
-            if (tilemaps == null) throw new ArgumentNullException(nameof(tilemaps));
+            tilemaps.RemoveAll(x => x.Equals(destroyTilemap));
+            tilemaps.RemoveAll(x => x.Equals(null));
 
-            this.tilemaps = tilemaps.Where(x => x != null).ToArray();
-
-            foreach (Tilemap tilemap in tilemaps)
+            if (tilemap.Equals(destroyTilemap))
             {
-                position = (value, tilemap);
-                if (tilemap.GetTile(position.value) != null) return;
+                foreach (Tilemap tilemap in tilemaps)
+                {
+                    this.tilemap = tilemap;
+
+                    if (this.tilemap.GetTile(position) != null) return;
+                }
+                outSideRoadEvent.OnNext(Unit.Default);
             }
-
-            throw new Exception("タイルから外れています");
         }
-
         public TilePosition GetAroundTile(TileDirection tileDirection)
         {
             foreach (Tilemap tilemap in tilemaps)
@@ -58,17 +74,21 @@ namespace Ryocatusn.TileTransforms
 
             return null;
         }
-        public Vector2 GetWorldPosition()
+        public Vector3 GetWorldPosition()
         {
-            Tilemap tilemap = position.tilemap;
-            return tilemap.CellToWorld(position.value) + Vector3.Scale(tilemap.cellSize, tilemap.transform.lossyScale) / 2;
+            return tilemap.CellToWorld(position) + Vector3.Scale(tilemap.cellSize, tilemap.transform.lossyScale) / 2;
+        }
+
+        public void Delete()
+        {
+            outSideRoadEvent.Dispose();
         }
 
         public bool Equals(TilePosition other)
         {
             if (ReferenceEquals(other, null)) return false;
             if (ReferenceEquals(other, this)) return true;
-            return Equals(position, other.position);
+            return Equals(id, other.id);
         }
         public override bool Equals(object obj)
         {
@@ -79,7 +99,7 @@ namespace Ryocatusn.TileTransforms
         }
         public override int GetHashCode()
         {
-            return position.GetHashCode();
+            return id != null ? id.GetHashCode() : 0;
         }
     }
 }

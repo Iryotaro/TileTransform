@@ -18,7 +18,7 @@ namespace Ryocatusn.TileTransforms.Movements
             }
         }
 
-        private List<TilePosition> data;
+        public List<TilePosition> data { get; }
 
         public MoveData(List<TilePosition> data)
         {
@@ -28,10 +28,6 @@ namespace Ryocatusn.TileTransforms.Movements
         public int GetCount()
         {
             return data.Count;
-        }
-        public bool IsActiveTilemaps()
-        {
-            return data.Where(x => x.position.tilemap == null).Count() == 0;
         }
     }
 }

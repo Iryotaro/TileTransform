@@ -31,14 +31,30 @@ namespace Ryocatusn.TileTransforms.Movements
             this.moveData = moveData;
             this.moveRate = moveRate;
 
+            foreach(TilePosition tilePosition in this.moveData.data)
+            {
+                tilePosition.OutSideRoadEvent
+                    .Subscribe(_ =>
+                    {
+                        if (tilePosition.Equals(nextPosition) || tilePosition.Equals(prevPosition))
+                        {
+                            if (!isCompleted) Kill();
+                        }
+                        else
+                        {
+                            
+                            if (!isCompleted) Stop();
+                        }
+                    });
+            }
+
             StartMove().Forget();
 
             CompleteEvent = completeEvent.FirstOrDefault();
-
             CompleteEvent.Subscribe(_ =>
             {
                 isCompleted = true;
-                Dispose();
+                Delete();
             });
         }
         private async UniTaskVoid StartMove()
@@ -59,11 +75,6 @@ namespace Ryocatusn.TileTransforms.Movements
             completeEvent.OnNext(Unit.Default);
         }
 
-        public bool IsActiveTilemaps()
-        {
-            return moveData.IsActiveTilemaps();
-        }
-
         private IEnumerator Move()
         {
             int index = 1;
@@ -81,7 +92,18 @@ namespace Ryocatusn.TileTransforms.Movements
 
                 float setNextPosition = Time.fixedTime;
 
-                moveUpdateDisposable = Observable.EveryUpdate().ObserveOn(Scheduler.MainThread)
+                //なぜかMainThreadにしないとOnNextされない
+                IDisposable disposable = null; 
+                disposable = Observable.Return(Unit.Default)
+                    .ObserveOn(Scheduler.MainThread)
+                    .Subscribe(_ =>
+                    {
+                        changeTilePositionEvent.OnNext(nextPosition);
+                        disposable.Dispose();
+                    });
+
+                moveUpdateDisposable = Observable.EveryUpdate()
+                    .ObserveOn(Scheduler.MainThread)
                     .Subscribe(x => Update((Time.fixedTime - setNextPosition) * moveRate.value));
 
                 yield return new WaitForSeconds(1 / moveRate.value);
@@ -94,11 +116,10 @@ namespace Ryocatusn.TileTransforms.Movements
         private void Update(float time)
         {
             Vector2 worldPosition = Vector2.Lerp(prevPosition.GetWorldPosition(), nextPosition.GetWorldPosition(), time);
-            changeTilePositionEvent.OnNext(nextPosition);
             changeWorldPositionEvent.OnNext(worldPosition);
         }
 
-        private void Dispose()
+        private void Delete()
         {
             if (moveUpdateDisposable != null) moveUpdateDisposable.Dispose();
             moveCancellationToken.Cancel();

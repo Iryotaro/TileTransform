@@ -36,7 +36,7 @@ namespace Ryocatusn.TileTransforms
                     return;
                 }
             }
-            throw new ArgumentException("許可されていない数値です", nameof(vector));
+            throw new TileTransformException("許可されていない数値です");
         }
         public Vector2 GetVector2()
         {
