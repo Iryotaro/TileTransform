@@ -18,8 +18,6 @@ namespace Ryocatusn.TileTransforms
         public List<Tilemap> tilemaps { get; private set; } = new List<Tilemap>();
         private bool enable = true;
 
-        private ReactiveProperty<bool> isOutSideRoadEvent = new ReactiveProperty<bool>(false);
-
         [SerializeField]
         private List<Tilemap> m_tilemaps;
 
@@ -32,10 +30,6 @@ namespace Ryocatusn.TileTransforms
             ChangePosition(transform.position);
             ChangeDirection(tileDirection = new TileDirection(TileDirection.Direction.Down));
 
-            isOutSideRoadEvent
-                .Where(x => x)
-                .Subscribe(_ => SetDisable());
-
             GetManager().Save(this);
         }
         private void OnDestroy()
@@ -45,8 +39,8 @@ namespace Ryocatusn.TileTransforms
 
         private void Update()
         {
+            tilePosition.Match(Some: x => { if (enable && x.outSideRoad) SetDisable(); });
             if (!IsEnableMovement() && enable) SetPositionWhenDisableMovement();
-            tilePosition.Match(Some: x => { if (enable) isOutSideRoadEvent.Value = x.outSideRoad; });
         }
 
         public TileTransformManager GetManager()
