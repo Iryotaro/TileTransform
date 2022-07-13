@@ -15,7 +15,7 @@ namespace Ryocatusn.TileTransforms
         public Option<TilePosition> tilePosition = new Option<TilePosition>(null);
         public TileDirection tileDirection { get; private set; }
         public Option<Movement> movement { get; } = new Option<Movement>(null);
-        public List<Tilemap> tilemaps { get; private set; } = new List<Tilemap>();
+        public List<Tilemap> tilemaps { get; private set; }
         private bool enable = true;
 
         [SerializeField]
@@ -23,7 +23,7 @@ namespace Ryocatusn.TileTransforms
 
         private void Awake()
         {
-            tilemaps = m_tilemaps;
+            tilemaps = m_tilemaps ?? new List<Tilemap>();
 
             id = new TileTransformId(Guid.NewGuid().ToString());
 
