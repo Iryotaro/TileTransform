@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace Ryocatusn.TileTransforms.Movements
+namespace Ryocatusn.TileTransforms
 {
     public class MoveTranslate : IMoveDataCreater
     {

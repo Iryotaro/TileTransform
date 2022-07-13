@@ -5,7 +5,7 @@ using Cysharp.Threading.Tasks;
 using UniRx;
 using UnityEngine;
 
-namespace Ryocatusn.TileTransforms.Movements
+namespace Ryocatusn.TileTransforms
 {
     public class Movement
     {
