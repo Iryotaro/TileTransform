@@ -1,9 +1,9 @@
+using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Ryocatusn.TileTransforms.AStars
 {
-    public class OpenList
+    public class ClosedList
     {
         private List<Node> nodes = new List<Node>();
 
@@ -13,9 +13,9 @@ namespace Ryocatusn.TileTransforms.AStars
 
             nodes.Add(node);
         }
-        public Node GetLeastScoreNode()
+        public bool IsClosed(Node node)
         {
-            return nodes.OrderBy(x => x.score).FirstOrDefault();
+            return nodes.Find(x => x.Equals(node)) != null;
         }
         public void Remove(Node node)
         {

@@ -14,7 +14,7 @@ namespace Ryocatusn.TileTransforms
                 return;
             }
 
-            TilePosition nextPosition = position.GetAroundTile(tileDirection);
+            TilePosition nextPosition = position.GetAroundTilePosition(tileDirection);
 
             if (nextPosition == null) moveData = null;
             else moveData = new MoveData(new List<TilePosition>() { position, nextPosition });

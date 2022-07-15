@@ -58,7 +58,7 @@ namespace Ryocatusn.TileTransforms
                 outSideRoad = true;
             }
         }
-        public TilePosition GetAroundTile(TileDirection tileDirection)
+        public TilePosition GetAroundTilePosition(TileDirection tileDirection)
         {
             if (outSideRoad) return null;
 

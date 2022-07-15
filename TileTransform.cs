@@ -5,7 +5,6 @@ using UniRx;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 using Ryocatusn.TileTransforms.Util;
-using Ryocatusn.TileTransforms.Movements;
 
 namespace Ryocatusn.TileTransforms
 {
