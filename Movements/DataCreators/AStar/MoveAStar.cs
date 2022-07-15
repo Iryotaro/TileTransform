@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Tilemaps;
 using Ryocatusn.TileTransforms.AStars;
 
 namespace Ryocatusn.TileTransforms
@@ -15,23 +16,18 @@ namespace Ryocatusn.TileTransforms
 
         private bool isSucess = true;
 
-        public MoveAStar(TileTransform target, Vector2 goalWorldPosition)
+        public MoveAStar(Vector2 startWorldPosition, Vector2 goalWorldPosition, List<Tilemap> tilemaps)
         {
-            if (target.tilePosition.Get() == null)
+            TilePosition startTilePosition = new TilePosition(startWorldPosition, tilemaps);
+            TilePosition goalTilePosition = new TilePosition(goalWorldPosition, tilemaps);
+
+            if (startTilePosition.outSideRoad || goalTilePosition.outSideRoad)
             {
                 isSucess = false;
                 return;
             }
 
-            TilePosition goalTilePosition = new TilePosition(goalWorldPosition, target.tilemaps);
-
-            if (goalTilePosition.outSideRoad)
-            {
-                isSucess = false;
-                return;
-            }
-
-            startNode = new Node(target.tilePosition.Get());
+            startNode = new Node(startTilePosition);
             goalNode = new Node(goalTilePosition);
             openList = new OpenList();
             closedList = new ClosedList();
