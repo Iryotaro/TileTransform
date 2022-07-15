@@ -1,7 +1,8 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
+using Ryocatusn.TileTransforms.AStars;
 
-namespace Ryocatusn.TileTransforms.AStars
+namespace Ryocatusn.TileTransforms
 {
     public class MoveAStar : IMoveDataCreater
     {
