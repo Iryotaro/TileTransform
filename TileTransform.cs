@@ -22,7 +22,7 @@ namespace Ryocatusn.TileTransforms
 
         private void Awake()
         {
-            tilemaps = m_tilemaps;
+            tilemaps = m_tilemaps ?? new List<Tilemap>();
 
             id = new TileTransformId(Guid.NewGuid().ToString());
 
@@ -112,11 +112,11 @@ namespace Ryocatusn.TileTransforms
 
         public void ChangeTilemap(Tilemap[] tilemaps, Vector2 startWorldPosition)
         {
-            SetDisable();
-
             this.tilemaps = tilemaps.ToList();
-            ChangePosition(startWorldPosition);
 
+            SetDisable();
+            transform.position = startWorldPosition;
+            ChangePosition(startWorldPosition);
             SetEnable();
         }
         public void AddTilemap(Tilemap addTilemap)
