@@ -20,7 +20,7 @@ namespace Ryocatusn.TileTransforms
             id = new TilePositionId(Guid.NewGuid().ToString());
 
             this.tilemaps = tilemaps ?? new List<Tilemap>();
-            tilemaps.RemoveAll(x => x == null);
+            this.tilemaps.RemoveAll(x => x == null);
 
             foreach (Tilemap tilemap in this.tilemaps)
             {
