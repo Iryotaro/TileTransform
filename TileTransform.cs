@@ -33,6 +33,7 @@ namespace Ryocatusn.TileTransforms
         }
         private void OnDestroy()
         {
+            SetDisable();
             GetManager().Delete(this);
         }
 
