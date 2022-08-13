@@ -82,6 +82,12 @@ namespace Ryocatusn.TileTransforms
             return tilemap.CellToWorld(position) + Vector3.Scale(tilemap.cellSize, tilemap.transform.lossyScale) / 2;
         }
 
+        public bool IsSamePlace(TilePosition other, float allowedRange = 0.3f)
+        {
+            if ((GetWorldPosition() - other.GetWorldPosition()).magnitude < allowedRange) return true;
+            return false;
+        }
+
         public bool Equals(TilePosition other)
         {
             if (ReferenceEquals(other, null)) return false;
