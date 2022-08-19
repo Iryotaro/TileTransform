@@ -87,6 +87,11 @@ namespace Ryocatusn.TileTransforms
             if ((GetWorldPosition() - other.GetWorldPosition()).magnitude < allowedRange) return true;
             return false;
         }
+        public bool IsSamePlace(Vector3 globalPosition, float allowedRange = 0.3f)
+        {
+            if ((GetWorldPosition() - globalPosition).magnitude < allowedRange) return true;
+            return false;
+        }
 
         public bool Equals(TilePosition other)
         {
