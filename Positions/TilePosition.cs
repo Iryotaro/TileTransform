@@ -28,6 +28,7 @@ namespace Ryocatusn.TileTransforms
                 position = this.tilemap.WorldToCell(worldPosition);
 
                 this.tilemap.OnDestroyAsObservable()
+                    .ObserveOn(Scheduler.MainThread)
                     .Subscribe(_ => TilemapOnDestroy(tilemap));
 
                 if (this.tilemap.GetTile(position) != null) return;
