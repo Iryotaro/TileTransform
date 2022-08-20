@@ -10,7 +10,6 @@ namespace Ryocatusn.TileTransforms
     public class TilePosition : IEquatable<TilePosition>
     {
         private TilePositionId id { get; }
-        private Vector3 worldPosition { get; }
         public Vector3Int cellPosition { get; private set; }
         private Tilemap tilemap;
         private List<Tilemap> tilemaps;
@@ -21,7 +20,6 @@ namespace Ryocatusn.TileTransforms
 
             tilemaps.RemoveAll(x => x == null);
             this.tilemaps = tilemaps;
-            this.worldPosition = worldPosition;
 
             foreach (Tilemap tilemap in this.tilemaps)
             {
@@ -45,9 +43,9 @@ namespace Ryocatusn.TileTransforms
                 foreach (Tilemap tilemap in tilemaps)
                 {
                     this.tilemap = tilemap;
-                    cellPosition = this.tilemap.WorldToCell(worldPosition);
+                    cellPosition = this.tilemap.WorldToCell(destroyTilemap.CellToWorld(cellPosition));
 
-                    if (this.tilemap.GetTile(tilemap.WorldToCell(worldPosition)) != null) return;
+                    if (this.tilemap.GetTile(tilemap.WorldToCell(cellPosition)) != null) return;
                 }
             }
         }
@@ -77,6 +75,9 @@ namespace Ryocatusn.TileTransforms
 
         public bool IsOutsideRoad()
         {
+            if (tilemap == null) return true;
+            Vector2 worldPosition = tilemap.CellToWorld(cellPosition);
+
             foreach (Tilemap tilemap in tilemaps)
             {
                 this.tilemap = tilemap;
