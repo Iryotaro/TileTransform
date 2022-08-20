@@ -21,7 +21,7 @@ namespace Ryocatusn.TileTransforms
             TilePosition startTilePosition = new TilePosition(startWorldPosition, tilemaps);
             TilePosition goalTilePosition = new TilePosition(goalWorldPosition, tilemaps);
 
-            if (startTilePosition.outSideRoad || goalTilePosition.outSideRoad)
+            if (startTilePosition.IsOutsideRoad() || goalTilePosition.IsOutsideRoad())
             {
                 isSucess = false;
                 return;

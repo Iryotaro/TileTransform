@@ -10,10 +10,10 @@ namespace Ryocatusn.TileTransforms
     public class TilePosition : IEquatable<TilePosition>
     {
         private TilePositionId id { get; }
-        public Vector3Int position { get; private set; }
+        private Vector3 worldPosition { get; }
+        public Vector3Int cellPosition { get; private set; }
         private Tilemap tilemap;
         private List<Tilemap> tilemaps;
-        public bool outSideRoad { get; private set; } = false;
 
         public TilePosition(Vector3 worldPosition, List<Tilemap> tilemaps)
         {
@@ -21,20 +21,18 @@ namespace Ryocatusn.TileTransforms
 
             tilemaps.RemoveAll(x => x == null);
             this.tilemaps = tilemaps;
+            this.worldPosition = worldPosition;
 
             foreach (Tilemap tilemap in this.tilemaps)
             {
                 this.tilemap = tilemap;
-                position = this.tilemap.WorldToCell(worldPosition);
+                cellPosition = this.tilemap.WorldToCell(worldPosition);
 
                 this.tilemap.OnDestroyAsObservable()
-                    .ObserveOn(Scheduler.MainThread)
                     .Subscribe(_ => TilemapOnDestroy(tilemap));
 
-                if (this.tilemap.GetTile(position) != null) return;
+                if (this.tilemap.GetTile(cellPosition) != null) return;
             }
-
-            outSideRoad = true;
         }
 
         private void TilemapOnDestroy(Tilemap destroyTilemap)
@@ -42,26 +40,20 @@ namespace Ryocatusn.TileTransforms
             tilemaps.Remove(destroyTilemap);
             tilemaps.RemoveAll(x => x.Equals(null));
 
-            if (tilemap == null) return;
-
-            Vector2 worldPosition = tilemap.CellToWorld(position);
-
             if (tilemap.Equals(destroyTilemap))
             {
                 foreach (Tilemap tilemap in tilemaps)
                 {
                     this.tilemap = tilemap;
-                    position = this.tilemap.WorldToCell(worldPosition);
+                    cellPosition = this.tilemap.WorldToCell(worldPosition);
 
                     if (this.tilemap.GetTile(tilemap.WorldToCell(worldPosition)) != null) return;
                 }
-
-                outSideRoad = true;
             }
         }
         public TilePosition GetAroundTilePosition(TileDirection tileDirection)
         {
-            if (outSideRoad) return null;
+            if (IsOutsideRoad()) return null;
 
             foreach (Tilemap tilemap in tilemaps)
             {
@@ -80,7 +72,20 @@ namespace Ryocatusn.TileTransforms
         }
         public Vector3 GetWorldPosition()
         {
-            return tilemap.CellToWorld(position) + Vector3.Scale(tilemap.cellSize, tilemap.transform.lossyScale) / 2;
+            return tilemap.CellToWorld(cellPosition) + Vector3.Scale(tilemap.cellSize, tilemap.transform.lossyScale) / 2;
+        }
+
+        public bool IsOutsideRoad()
+        {
+            foreach (Tilemap tilemap in tilemaps)
+            {
+                this.tilemap = tilemap;
+                cellPosition = this.tilemap.WorldToCell(worldPosition);
+
+                if (this.tilemap.GetTile(tilemap.WorldToCell(worldPosition)) != null) return false;
+            }
+
+            return true;
         }
 
         public bool IsSamePlace(TilePosition other, float allowedRange = 0.3f)

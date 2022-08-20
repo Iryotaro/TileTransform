@@ -64,7 +64,7 @@ namespace Ryocatusn.TileTransforms.AStars
         {
             if (ReferenceEquals(other, null)) return false;
             if (ReferenceEquals(other, this)) return true;
-            return Equals(tilePosition.position, other.tilePosition.position);
+            return Equals(tilePosition.cellPosition, other.tilePosition.cellPosition);
         }
         public override bool Equals(object obj)
         {
@@ -75,7 +75,7 @@ namespace Ryocatusn.TileTransforms.AStars
         }
         public override int GetHashCode()
         {
-            return tilePosition.position.GetHashCode();
+            return tilePosition.cellPosition.GetHashCode();
         }
     }
 }

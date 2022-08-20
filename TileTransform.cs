@@ -39,7 +39,7 @@ namespace Ryocatusn.TileTransforms
 
         private void Update()
         {
-            tilePosition.Match(Some: x => { if (enable && x.outSideRoad) SetDisable(); });
+            tilePosition.Match(Some: x => { if (enable && x.IsOutsideRoad()) SetDisable(); });
             if (!IsEnableMovement() && enable) SetPositionWhenDisableMovement();
         }
 
