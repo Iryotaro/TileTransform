@@ -80,6 +80,8 @@ namespace Ryocatusn.TileTransforms
 
             foreach (Tilemap tilemap in tilemaps)
             {
+                if (tilemap == null) continue;
+
                 this.tilemap = tilemap;
                 cellPosition = this.tilemap.WorldToCell(worldPosition);
 
