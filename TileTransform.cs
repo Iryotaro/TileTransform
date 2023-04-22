@@ -15,6 +15,7 @@ namespace Ryocatusn.TileTransforms
         public TileDirection tileDirection { get; private set; }
         public Option<Movement> movement { get; } = new Option<Movement>(null);
         public List<Tilemap> tilemaps { get; private set; } = new List<Tilemap>();
+        public float angle { get; private set; }
         private bool enable = true;
 
         [SerializeField]
@@ -89,6 +90,7 @@ namespace Ryocatusn.TileTransforms
             {
                 x.ChangeTilePositionEvent.Subscribe(x => ChangePosition(x.GetWorldPosition(), false)).AddTo(this);
                 x.ChangeWorldPositionEvent.Subscribe(x => transform.position = x).AddTo(this);
+                x.ChangeAngleEvent.Subscribe(x => angle = x).AddTo(this);
                 x.CompleteEvent.Subscribe(_ => movement.Set(null));
             });
         }

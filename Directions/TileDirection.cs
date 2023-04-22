@@ -1,5 +1,4 @@
-﻿using System;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace Ryocatusn.TileTransforms
 {
@@ -51,6 +50,17 @@ namespace Ryocatusn.TileTransforms
             }
 
             return vector;
+        }
+        public Quaternion GetRotation()
+        {
+            return value switch
+            {
+                Direction.Up => Quaternion.Euler(0, 0, 0),
+                Direction.Down => Quaternion.Euler(0, 0, 180),
+                Direction.Left => Quaternion.Euler(0, 0, 90),
+                Direction.Right => Quaternion.Euler(0, 0, -90),
+                _ => Quaternion.Euler(0, 0, 0)
+            };
         }
 
         public bool Equals(TileDirection other)
