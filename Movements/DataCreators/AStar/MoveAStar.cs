@@ -57,11 +57,12 @@ namespace Ryocatusn.TileTransforms
                 {
                     if (node.parentNode == null) break;
 
-                    data.Add(node.parentNode.tilePosition); 
+                    data.Add(node.parentNode.tilePosition);
                     node = node.parentNode;
                 }
 
                 data.Reverse();
+                data.Add(goalNode.tilePosition);
             }
         }
 
