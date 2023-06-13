@@ -21,6 +21,12 @@ namespace Ryocatusn.TileTransforms
         [SerializeField]
         private List<Tilemap> m_tilemaps;
 
+        public enum SetMovementMode
+        {
+            Normal,
+            Force
+        }
+
         private void Awake()
         {
             tilemaps = m_tilemaps ?? new List<Tilemap>();
@@ -79,9 +85,11 @@ namespace Ryocatusn.TileTransforms
             if (IsEnableMovement()) movement.Match(x => x.Kill());
         }
 
-        public void SetMovement(IMoveDataCreater moveDataCreater, MoveRate moveRate)
+        public void SetMovement(IMoveDataCreater moveDataCreater, MoveRate moveRate, SetMovementMode mode = SetMovementMode.Normal)
         {
-            if (!IsAllowedSetMovement(moveDataCreater)) return;
+            if (mode == SetMovementMode.Force) KillMovement();
+
+            if (!IsAllowedSetMovement(moveDataCreater, mode)) return;
 
             MoveData moveData = moveDataCreater.GetData();
             movement.Set(new Movement(moveData, moveRate));
@@ -94,7 +102,7 @@ namespace Ryocatusn.TileTransforms
                 x.CompleteEvent.Subscribe(_ => movement.Set(null));
             });
         }
-        private bool IsAllowedSetMovement(IMoveDataCreater moveDataCreater)
+        private bool IsAllowedSetMovement(IMoveDataCreater moveDataCreater, SetMovementMode mode)
         {
             if (!enable) return false;
             if (!moveDataCreater.IsSuccess()) return false;
