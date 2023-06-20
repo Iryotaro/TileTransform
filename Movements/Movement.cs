@@ -15,7 +15,6 @@ namespace Ryocatusn.TileTransforms
         private TilePosition nextPosition;
         public bool isCompleted { get; private set; } = false;
         private bool stop = false;
-        public TileDirection moveDirection { get; private set; } = new TileDirection(TileDirection.Direction.Up);
         private IDisposable moveUpdateDisposable;
         private CancellationTokenSource moveCancellationToken;
 
@@ -77,8 +76,6 @@ namespace Ryocatusn.TileTransforms
                 float angle = -90 + Mathf.Atan2(
                     nextPosition.GetWorldPosition().y - prevPosition.GetWorldPosition().y, 
                     nextPosition.GetWorldPosition().x - prevPosition.GetWorldPosition().x) * Mathf.Rad2Deg;
-
-                moveDirection = new TileDirection(angle);
 
                 float setNextPosition = Time.fixedTime;
 

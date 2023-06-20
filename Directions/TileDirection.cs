@@ -41,7 +41,7 @@ namespace Ryocatusn.TileTransforms
         {
             if (45 <= angle && angle < 135) new TileDirection(Direction.Left);
             else if (135 <= angle && angle < 225) new TileDirection(Direction.Down);
-            else if (225 <= angle && angle < 315) new TileDirection(Direction.Left);
+            else if (225 <= angle && angle < 315) new TileDirection(Direction.Right);
             else new TileDirection(Direction.Up);
         }
         public Vector2 GetVector2()
