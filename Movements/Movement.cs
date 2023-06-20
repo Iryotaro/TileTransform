@@ -15,7 +15,7 @@ namespace Ryocatusn.TileTransforms
         private TilePosition nextPosition;
         public bool isCompleted { get; private set; } = false;
         private bool stop = false;
-        private TileDirection moveDirection;
+        public TileDirection moveDirection { get; private set; } = new TileDirection(TileDirection.Direction.Up);
         private IDisposable moveUpdateDisposable;
         private CancellationTokenSource moveCancellationToken;
 

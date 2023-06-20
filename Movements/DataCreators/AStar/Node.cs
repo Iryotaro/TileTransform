@@ -15,7 +15,7 @@ namespace Ryocatusn.TileTransforms.AStars
 
         public Node(TilePosition tilePosition)
         {
-            if (tilePosition == null) throw new TileTransformException("node‚ÌtilePosition‚ªnull‚Å‚·");
+            if (tilePosition == null) throw new TileTransformException("nodeï¿½ï¿½tilePositionï¿½ï¿½nullï¿½Å‚ï¿½");
             this.tilePosition = tilePosition;
         }
 
