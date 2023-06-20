@@ -1,8 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 
-namespace Ryocatusn.TileTransforms.Movements
+namespace Ryocatusn.TileTransforms
 {
     public class MoveData
     {

@@ -1,4 +1,4 @@
-﻿namespace Ryocatusn.TileTransforms.Movements
+﻿namespace Ryocatusn.TileTransforms
 {
     public interface IMoveDataCreater
     {

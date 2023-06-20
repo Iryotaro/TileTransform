@@ -5,7 +5,6 @@ using UniRx;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 using Ryocatusn.TileTransforms.Util;
-using Ryocatusn.TileTransforms.Movements;
 
 namespace Ryocatusn.TileTransforms
 {
@@ -15,11 +14,22 @@ namespace Ryocatusn.TileTransforms
         public Option<TilePosition> tilePosition = new Option<TilePosition>(null);
         public TileDirection tileDirection { get; private set; }
         public Option<Movement> movement { get; } = new Option<Movement>(null);
+<<<<<<< HEAD
         public List<Tilemap> tilemaps { get; private set; }
+=======
+        public List<Tilemap> tilemaps { get; private set; } = new List<Tilemap>();
+        public float angle { get; private set; }
+>>>>>>> 44471f00ca335db168b3f2fe6e8ffd8aa9868905
         private bool enable = true;
 
         [SerializeField]
         private List<Tilemap> m_tilemaps;
+
+        public enum SetMovementMode
+        {
+            Normal,
+            Force
+        }
 
         private void Awake()
         {
@@ -34,12 +44,13 @@ namespace Ryocatusn.TileTransforms
         }
         private void OnDestroy()
         {
+            SetDisable();
             GetManager().Delete(this);
         }
 
         private void Update()
         {
-            tilePosition.Match(Some: x => { if (enable && x.outSideRoad) SetDisable(); });
+            tilePosition.Match(Some: x => { if (enable && x.IsOutsideRoad()) SetDisable(); });
             if (!IsEnableMovement() && enable) SetPositionWhenDisableMovement();
         }
 
@@ -78,9 +89,11 @@ namespace Ryocatusn.TileTransforms
             if (IsEnableMovement()) movement.Match(x => x.Kill());
         }
 
-        public void SetMovement(IMoveDataCreater moveDataCreater, MoveRate moveRate)
+        public void SetMovement(IMoveDataCreater moveDataCreater, MoveRate moveRate, SetMovementMode mode = SetMovementMode.Normal)
         {
-            if (!IsAllowedSetMovement(moveDataCreater)) return;
+            if (mode == SetMovementMode.Force) KillMovement();
+
+            if (!IsAllowedSetMovement(moveDataCreater, mode)) return;
 
             MoveData moveData = moveDataCreater.GetData();
             movement.Set(new Movement(moveData, moveRate));
@@ -89,10 +102,11 @@ namespace Ryocatusn.TileTransforms
             {
                 x.ChangeTilePositionEvent.Subscribe(x => ChangePosition(x.GetWorldPosition(), false)).AddTo(this);
                 x.ChangeWorldPositionEvent.Subscribe(x => transform.position = x).AddTo(this);
+                x.ChangeAngleEvent.Subscribe(x => angle = x).AddTo(this);
                 x.CompleteEvent.Subscribe(_ => movement.Set(null));
             });
         }
-        private bool IsAllowedSetMovement(IMoveDataCreater moveDataCreater)
+        private bool IsAllowedSetMovement(IMoveDataCreater moveDataCreater, SetMovementMode mode)
         {
             if (!enable) return false;
             if (!moveDataCreater.IsSuccess()) return false;

@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace Ryocatusn.TileTransforms.Movements
+namespace Ryocatusn.TileTransforms
 {
     public class MoveTranslate : IMoveDataCreater
     {
@@ -14,7 +14,7 @@ namespace Ryocatusn.TileTransforms.Movements
                 return;
             }
 
-            TilePosition nextPosition = position.GetAroundTile(tileDirection);
+            TilePosition nextPosition = position.GetAroundTilePosition(tileDirection);
 
             if (nextPosition == null) moveData = null;
             else moveData = new MoveData(new List<TilePosition>() { position, nextPosition });

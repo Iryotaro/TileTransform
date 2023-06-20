@@ -5,7 +5,7 @@ using Cysharp.Threading.Tasks;
 using UniRx;
 using UnityEngine;
 
-namespace Ryocatusn.TileTransforms.Movements
+namespace Ryocatusn.TileTransforms
 {
     public class Movement
     {
@@ -15,15 +15,18 @@ namespace Ryocatusn.TileTransforms.Movements
         private TilePosition nextPosition;
         public bool isCompleted { get; private set; } = false;
         private bool stop = false;
+        private TileDirection moveDirection;
         private IDisposable moveUpdateDisposable;
         private CancellationTokenSource moveCancellationToken;
 
         private Subject<TilePosition> changeTilePositionEvent = new Subject<TilePosition>();
         private Subject<Vector2> changeWorldPositionEvent = new Subject<Vector2>();
+        private Subject<float> changeAngleEvent = new Subject<float>();
         private Subject<Unit> completeEvent = new Subject<Unit>();
 
         public IObservable<TilePosition> ChangeTilePositionEvent => changeTilePositionEvent;
         public IObservable<Vector2> ChangeWorldPositionEvent => changeWorldPositionEvent;
+        public IObservable<float> ChangeAngleEvent => changeAngleEvent;
         public IObservable<Unit> CompleteEvent;
 
         public Movement(MoveData moveData, MoveRate moveRate)
@@ -71,6 +74,12 @@ namespace Ryocatusn.TileTransforms.Movements
                 nextPosition = moveData[index];
                 index++;
 
+                float angle = -90 + Mathf.Atan2(
+                    nextPosition.GetWorldPosition().y - prevPosition.GetWorldPosition().y, 
+                    nextPosition.GetWorldPosition().x - prevPosition.GetWorldPosition().x) * Mathf.Rad2Deg;
+
+                moveDirection = new TileDirection(angle);
+
                 float setNextPosition = Time.fixedTime;
 
                 //なぜかMainThreadにしないとOnNextされない
@@ -80,6 +89,7 @@ namespace Ryocatusn.TileTransforms.Movements
                     .Subscribe(_ =>
                     {
                         changeTilePositionEvent.OnNext(nextPosition);
+                        changeAngleEvent.OnNext(angle);
                         disposable.Dispose();
                     });
 
@@ -110,6 +120,7 @@ namespace Ryocatusn.TileTransforms.Movements
             {
                 changeTilePositionEvent.Dispose();
                 changeWorldPositionEvent.Dispose();
+                changeAngleEvent.Dispose();
                 completeEvent.Dispose();
             });
         }

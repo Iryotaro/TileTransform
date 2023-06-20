@@ -1,6 +1,6 @@
 {
     "name": "com.ryotaro.tiletransform",
-    "version": "1.0.0",
+    "version": "1.3.0",
     "displayName": "Tile Transform",
     "unity": "2020.3",
     "dependencies": {

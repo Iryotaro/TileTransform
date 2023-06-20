@@ -56,8 +56,8 @@ public class ButtonOnlyCrossComposite : InputBindingComposite<Vector2>
         if (GetDirection() == null) return Vector2.zero;
 
         TileDirection.Direction direction = GetDirection() ?? TileDirection.Direction.Up;
-        TileDirection humanDirection = new TileDirection(direction);
-        return humanDirection.GetVector2();
+        TileDirection tileDirection = new TileDirection(direction);
+        return tileDirection.GetVector2();
     }
     public override float EvaluateMagnitude(ref InputBindingCompositeContext context)
     {

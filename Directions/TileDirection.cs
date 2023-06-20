@@ -1,5 +1,4 @@
-﻿using System;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace Ryocatusn.TileTransforms
 {
@@ -38,6 +37,13 @@ namespace Ryocatusn.TileTransforms
             }
             throw new TileTransformException("許可されていない数値です");
         }
+        public TileDirection(float angle)
+        {
+            if (45 <= angle && angle < 135) new TileDirection(Direction.Left);
+            else if (135 <= angle && angle < 225) new TileDirection(Direction.Down);
+            else if (225 <= angle && angle < 315) new TileDirection(Direction.Left);
+            else new TileDirection(Direction.Up);
+        }
         public Vector2 GetVector2()
         {
             Vector2 vector = Vector2.zero;
@@ -51,6 +57,17 @@ namespace Ryocatusn.TileTransforms
             }
 
             return vector;
+        }
+        public Quaternion GetRotation()
+        {
+            return value switch
+            {
+                Direction.Up => Quaternion.Euler(0, 0, 0),
+                Direction.Down => Quaternion.Euler(0, 0, 180),
+                Direction.Left => Quaternion.Euler(0, 0, 90),
+                Direction.Right => Quaternion.Euler(0, 0, -90),
+                _ => Quaternion.Euler(0, 0, 0)
+            };
         }
 
         public bool Equals(TileDirection other)
