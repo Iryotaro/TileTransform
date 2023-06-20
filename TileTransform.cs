@@ -14,12 +14,10 @@ namespace Ryocatusn.TileTransforms
         public Option<TilePosition> tilePosition = new Option<TilePosition>(null);
         public TileDirection tileDirection { get; private set; }
         public Option<Movement> movement { get; } = new Option<Movement>(null);
-<<<<<<< HEAD
-        public List<Tilemap> tilemaps { get; private set; }
-=======
+
         public List<Tilemap> tilemaps { get; private set; } = new List<Tilemap>();
         public float angle { get; private set; }
->>>>>>> 44471f00ca335db168b3f2fe6e8ffd8aa9868905
+
         private bool enable = true;
 
         [SerializeField]
