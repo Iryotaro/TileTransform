@@ -41,10 +41,6 @@ namespace Ryocatusn.TileTransforms
         {
             angle = Mathf.Abs(angle % 360);
 
-            Debug.Log(45 <= angle);
-            Debug.Log(angle < 135);
-            Debug.Log(45 <= angle && angle < 135);
-
             if (45 <= angle && angle < 135) value = Direction.Left;
             else if (135 <= angle && angle < 225) value = Direction.Down;
             else if (225 <= angle && angle < 315) value = Direction.Right;
